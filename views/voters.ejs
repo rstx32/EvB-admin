@@ -1,0 +1,235 @@
+<!-- modal button add voter -->
+<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addVoter">
+    <i class="bi bi-person-plus"> Add Voter</i>
+</button>
+
+<!-- modal box add voter -->
+<div class="modal fade" id="addVoter" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <!-- modal header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Voter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- modal body -->
+            <div class="modal-body">
+                <!-- form -->
+                <form method="post" action="/voters">
+                    <!-- username -->
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">@</span>
+                        <input type="text" name="username" class="form-control" id="username" placeholder="username..."
+                            required>
+                    </div>
+                    <!-- fullname -->
+                    <div class="form-floating mb-3">
+                        <input type="text" name="fullname" class="form-control" id="floatingInput"
+                            placeholder="fullname">
+                        <label for="floatingInput">Full Name</label>
+                    </div>
+                    <!-- email -->
+                    <div class="form-floating mb-3">
+                        <input type="email" name="email" class="form-control" id="floatingInput"
+                            placeholder="name@example.com">
+                        <label for="floatingInput">Email address</label>
+                    </div>
+                    <!-- password -->
+                    <div class="form-floating">
+                        <input type="password" name="password" class="form-control" id="floatingPassword"
+                            placeholder="Password">
+                        <label for="floatingPassword">Password</label>
+                    </div>
+                    <!-- photo upload -->
+                    <!-- <div class="mb-3">
+                        <label for="formFileSm" class="form-label">Photo Upload</label>
+                        <input class="form-control form-control-sm" id="formFileSm" type="file">
+                    </div>
+                    <br> -->
+                    <br>
+                    <!-- submit -->
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+                <!-- end form -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <!-- voter table list -->
+    <table class="table table-striped table-hover">
+        <!-- header tabel -->
+        <thead>
+            <tr class="table-primary">
+                <th scope="col">#</th>
+                <th scope="col">Username</th>
+                <th scope="col">Fullname</th>
+                <th scope="col">Password</th>
+                <th scope="col">Detail</th>
+            </tr>
+        </thead>
+
+        <!-- isi tabel -->
+        <tbody>
+            <% voters.forEach((v, num)=> { ++num %>
+                <tr>
+                    <th scope="row">
+                        <%= num %>
+                    </th>
+                    <td>
+                        <%= v.username %>
+                    </td>
+                    <td>
+                        <%= v.fullname %>
+                    </td>
+                    <td>
+                        <%= v.password %>
+                    </td>
+                    <td>
+                        <!-- modal button detail voter -->
+                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#modal<%= v._id %>">
+                            <i class="bi bi-info-square"></i>
+                        </button>
+
+                        <!-- modal box detail voter -->
+                        <div class="modal fade" id="modal<%= v._id %>" tabindex="-1" aria-labelledby="exampleModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content">
+                                    <!-- modal header -->
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalTitle">
+                                            Detail Voter
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <!-- modal body -->
+                                    <div class="modal-body">
+                                        <div class="container-fluid">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <img src="#" class="img-fluid">
+                                                </div>
+
+                                                <div class="col-md">
+                                                    <div class="row">
+                                                        <table class="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th colspan="2">
+                                                                        <h3>
+                                                                            <%= v.fullname %>
+                                                                        </h3>
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th scope="row">Username</th>
+                                                                    <td>
+                                                                        <%= v.username %>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th scope="row">Email</th>
+                                                                    <td>
+                                                                        <%= v.email %>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th scope="row">Password</th>
+                                                                    <td>
+                                                                        <%= v.password %>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- modal footer -->
+                                    <div class="modal-footer">
+                                        <!-- modal button delete voter -->
+                                        <form method="post" action="/voters?_method=DELETE">
+                                            <input type="hidden" name="id" value="<%= v._id %>">
+                                            <button type="submit" class="btn btn-danger"
+                                                data-bs-dismiss="modal" onclick="return confirm('are you sure?')">Delete</button>
+                                        </form>
+                                        <!-- modal button edit voter -->
+                                        <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                            data-bs-target="#editVoter">
+                                            Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- modal box edit voter -->
+                        <div class="modal fade" id="editVoter" aria-hidden="true"
+                            aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content">
+                                    <!-- modal header -->
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Edit Voter Username : <%=
+                                                v.username %>
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <!-- modal body -->
+                                    <div class="modal-body">
+                                        <!-- form -->
+                                        <form method="post" action="/voters/update">
+                                            <!-- username -->
+                                            <div class="input-group mb-3">
+                                                <span class="input-group-text" id="basic-addon1">@</span>
+                                                <input type="text" name="username" class="form-control" id="username"
+                                                    placeholder="username..." value="<%= v.username %>" required
+                                                    disabled>
+                                            </div>
+                                            <!-- fullname -->
+                                            <div class="form-floating mb-3">
+                                                <input type="text" name="fullname" class="form-control"
+                                                    id="floatingInput" placeholder="fullname" value="<%= v.fullname %>"
+                                                    required>
+                                                <label for="floatingInput">Full Name</label>
+                                            </div>
+                                            <!-- email -->
+                                            <div class="form-floating mb-3">
+                                                <input type="email" name="email" class="form-control" id="floatingInput"
+                                                    placeholder="name@example.com" value="<%= v.email %>" required>
+                                                <label for="floatingInput">Email address</label>
+                                            </div>
+                                            <!-- password -->
+                                            <div class="form-floating">
+                                                <input type="password" name="password" class="form-control"
+                                                    id="floatingPassword" placeholder="Password" required>
+                                                <label for="floatingPassword">Password</label>
+                                            </div>
+                                            <!-- photo upload -->
+                                            <!-- <div class="mb-3">
+        <label for="formFileSm" class="form-label">Photo Upload</label>
+        <input class="form-control form-control-sm" id="formFileSm" type="file">
+    </div>
+    <br> -->
+                                            <br>
+                                            <!-- submit -->
+                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                        </form>
+                                        <!-- end form -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <% }) %>
+        </tbody>
+    </table>
+</div>
