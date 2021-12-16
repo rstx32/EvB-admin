@@ -8,7 +8,20 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "name": "web",
-            "program": "${workspaceFolder}/backend/mongo.js",
+            "program": "${workspaceFolder}/backend/web.js",
+            "request": "launch",
+            "restart": true,
+            "runtimeExecutable": "nodemon",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node"
+        },
+        {
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "name": "db",
+            "program": "${workspaceFolder}/backend/db.js",
             "request": "launch",
             "restart": true,
             "runtimeExecutable": "nodemon",
