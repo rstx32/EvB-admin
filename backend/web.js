@@ -40,7 +40,6 @@ app.post('/voters', (req, res) => {
 // edit voters
 app.put('/voters', (req, res) => {
   editVoter(req.body)
-  // res.send(req.body)
   res.redirect('/voters')
 })
 
