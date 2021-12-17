@@ -1,9 +1,8 @@
 const express = require('express')
 const expressLayouts = require('express-ejs-layouts')
 const app = express()
-const { addVoter, deleteVoter } = require('./db')
+const { getVoter, addVoter, deleteVoter, editVoter } = require('./db')
 const methodOverride = require('method-override')
-const { Voter } = require('./model/voter')
 
 require('dotenv').config({ path: './backend/.env' })
 
@@ -22,8 +21,8 @@ app.get('/', (req, res) => {
 
 /////////////////////////////////////////// voters ///////////////////////////////////////////
 // get all voters
-app.get('/voters', async (req, res) => {
-  const voters = await Voter.find({})
+app.get('/voters', async (req, res) => {  
+  const voters = await getVoter()
 
   res.render('voters', {
     layout: 'layouts/main-layout',
@@ -32,19 +31,22 @@ app.get('/voters', async (req, res) => {
   })
 })
 
-// post form voters
+// add voters
 app.post('/voters', (req, res) => {
   addVoter(req.body)
   res.redirect('/voters')
 })
 
-// post update voters
-app.post('/voters/update', (req, res) => {})
+// edit voters
+app.put('/voters', (req, res) => {
+  editVoter(req.body)
+  // res.send(req.body)
+  res.redirect('/voters')
+})
 
-// delete a voters
+// delete voters
 app.delete('/voters', (req, res) => {
   deleteVoter(req.body.id)
-  // res.send(req.body.id)
   res.redirect('/voters')
 })
 /////////////////////////////////////// end of voters ////////////////////////////////////////

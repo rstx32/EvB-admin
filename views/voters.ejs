@@ -134,6 +134,12 @@
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
+                                                                    <th scope="row">Full Name</th>
+                                                                    <td>
+                                                                        <%= v.fullname %>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
                                                                     <th scope="row">Email</th>
                                                                     <td>
                                                                         <%= v.email %>
@@ -157,12 +163,12 @@
                                         <!-- modal button delete voter -->
                                         <form method="post" action="/voters?_method=DELETE">
                                             <input type="hidden" name="id" value="<%= v._id %>">
-                                            <button type="submit" class="btn btn-danger"
-                                                data-bs-dismiss="modal" onclick="return confirm('are you sure?')">Delete</button>
+                                            <button type="submit" class="btn btn-danger" data-bs-dismiss="modal"
+                                                onclick="return confirm('are you sure?')">Delete</button>
                                         </form>
                                         <!-- modal button edit voter -->
                                         <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                                            data-bs-target="#editVoter">
+                                            data-bs-target="#editVoter<%= v._id %>">
                                             Edit
                                         </button>
                                     </div>
@@ -170,14 +176,13 @@
                             </div>
                         </div>
                         <!-- modal box edit voter -->
-                        <div class="modal fade" id="editVoter" aria-hidden="true"
+                        <div class="modal fade" id="editVoter<%= v._id %>" aria-hidden="true"
                             aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
                             <div class="modal-dialog modal-dialog-centered modal-lg">
                                 <div class="modal-content">
                                     <!-- modal header -->
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Edit Voter Username : <%=
-                                                v.username %>
+                                        <h5 class="modal-title" id="exampleModalLabel">Edit Voter : <%= v.username %>
                                         </h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                             aria-label="Close"></button>
@@ -185,32 +190,28 @@
                                     <!-- modal body -->
                                     <div class="modal-body">
                                         <!-- form -->
-                                        <form method="post" action="/voters/update">
-                                            <!-- username -->
-                                            <div class="input-group mb-3">
-                                                <span class="input-group-text" id="basic-addon1">@</span>
-                                                <input type="text" name="username" class="form-control" id="username"
-                                                    placeholder="username..." value="<%= v.username %>" required
-                                                    disabled>
-                                            </div>
+                                        <form method="post" action="/voters?_method=PUT">
+                                            <!-- hidden input value -->
+                                            <input type="hidden" name="id" value="<%= v._id %>">
+                                            <input type="hidden" name="username" value="<%= v.username %>">
                                             <!-- fullname -->
                                             <div class="form-floating mb-3">
                                                 <input type="text" name="fullname" class="form-control"
                                                     id="floatingInput" placeholder="fullname" value="<%= v.fullname %>"
                                                     required>
-                                                <label for="floatingInput">Full Name</label>
+                                                <label for="floatingInput">New Full Name</label>
                                             </div>
                                             <!-- email -->
                                             <div class="form-floating mb-3">
                                                 <input type="email" name="email" class="form-control" id="floatingInput"
                                                     placeholder="name@example.com" value="<%= v.email %>" required>
-                                                <label for="floatingInput">Email address</label>
+                                                <label for="floatingInput">New Email address</label>
                                             </div>
                                             <!-- password -->
                                             <div class="form-floating">
                                                 <input type="password" name="password" class="form-control"
                                                     id="floatingPassword" placeholder="Password" required>
-                                                <label for="floatingPassword">Password</label>
+                                                <label for="floatingPassword">New Password</label>
                                             </div>
                                             <!-- photo upload -->
                                             <!-- <div class="mb-3">
@@ -220,7 +221,7 @@
     <br> -->
                                             <br>
                                             <!-- submit -->
-                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                            <button type="submit" class="btn btn-primary">Save</button>
                                         </form>
                                         <!-- end form -->
                                     </div>

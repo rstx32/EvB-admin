@@ -7,8 +7,8 @@ const { ObjectId } = require('mongodb')
 mongoose.connect(uri)
 
 // get all voter
-const getVoter = () => {
-  Voter.find()
+const getVoter = async () => {
+  return await Voter.find()
 }
 
 // add voter
@@ -17,7 +17,7 @@ const addVoter = (newVoter) => {
     username: newVoter.username,
     email: newVoter.email,
     fullname: newVoter.fullname,
-    password: CryptoJS.SHA256(newVoter.password),
+    password: CryptoJS.SHA256(newVoter.password).toString(),
   }).save()
 }
 
@@ -29,9 +29,24 @@ const deleteVoter = async (id) => {
 }
 
 // edit voter
-const editVoter = (id) => {}
+const editVoter = async (newVoter) => {
+  await Voter.updateOne(
+    {
+      _id: ObjectId(newVoter.id),
+    },
+    {
+      $set: {
+        email: newVoter.email,
+        fullname: newVoter.fullname,
+        password: CryptoJS.SHA256(newVoter.password).toString(),
+      },
+    }
+  )
+}
 
 module.exports = {
+  getVoter,
   addVoter,
   deleteVoter,
+  editVoter,
 }
