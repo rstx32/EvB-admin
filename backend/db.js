@@ -1,8 +1,8 @@
 require('dotenv').config({ path: './backend/.env' })
-const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@evb.5juvj.mongodb.net/${process.env.MONGODB_DB}?retryWrites=true&w=majority`
+const uri = `${process.env.MONGODB_URL}`
 const mongoose = require('mongoose')
-const { Voter } = require('./model/voter')
 const CryptoJS = require('crypto-js')
+const { Voter } = require('./model/voter')
 const { ObjectId } = require('mongodb')
 mongoose.connect(uri)
 
@@ -36,6 +36,7 @@ const editVoter = async (newVoter) => {
     },
     {
       $set: {
+        username: newVoter.username,
         email: newVoter.email,
         fullname: newVoter.fullname,
         password: CryptoJS.SHA256(newVoter.password).toString(),
