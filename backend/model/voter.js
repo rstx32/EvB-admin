@@ -15,7 +15,6 @@ const Voter = mongoose.model('Voter', {
     required: true,
   },
   email: String,
-  photo: String,
 })
 
 module.exports = {
