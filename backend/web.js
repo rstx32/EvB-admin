@@ -8,6 +8,7 @@ require('dotenv').config({ path: './backend/.env' })
 
 app.set('view engine', 'ejs')
 app.use(expressLayouts)
+app.use(express.static('public'))
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 
@@ -47,6 +48,12 @@ app.put('/voters', (req, res) => {
 app.delete('/voters', (req, res) => {
   deleteVoter(req.body.id)
   res.redirect('/voters')
+})
+
+// API export voters
+app.get('/backend/voters', async (req, res) => {
+  const voters = await getVoter()
+  res.json(voters)
 })
 /////////////////////////////////////// end of voters ////////////////////////////////////////
 
