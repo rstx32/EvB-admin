@@ -1,15 +1,19 @@
 require('dotenv').config({ path: './backend/.env' })
-const uri = `${process.env.MONGODB_URL}`
 const mongoose = require('mongoose')
 const CryptoJS = require('crypto-js')
+const fs = require('fs')
 const { Voter } = require('./model/voter')
 const { ObjectId } = require('mongodb')
-const fs = require('fs')
-mongoose.connect(uri)
+mongoose.connect(`${process.env.MONGODB_URL}`)
 
 // get all voter
 const getVoter = async () => {
   return await Voter.find()
+}
+
+// get a voter
+const getSingleVoter = async (id) => {
+  return await Voter.findById(id)
 }
 
 // add voter
@@ -32,8 +36,7 @@ const deleteVoter = async (id) => {
 
 // edit voter
 const editVoter = async (newVoter, newPhoto) => {
-  const oldPhoto = await getSingleVoter(newVoter.id)
-  
+  // change voters with the new one
   await Voter.updateOne(
     {
       _id: ObjectId(newVoter.id),
@@ -49,17 +52,14 @@ const editVoter = async (newVoter, newPhoto) => {
     }
   )
 
+  // delete old photo
+  const oldPhoto = await getSingleVoter(newVoter.id)
   fs.unlink(`public/photo/voters/${oldPhoto.photo}`, (err) => {
     if (err) {
       console.error(err)
       return
     }
   })
-}
-
-// get a voter
-const getSingleVoter = async (id) => {
-  return await Voter.findById(id)
 }
 
 module.exports = {
