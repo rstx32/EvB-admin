@@ -15,7 +15,7 @@
             <!-- modal body -->
             <div class="modal-body">
                 <!-- form -->
-                <form method="post" action="/voters">
+                <form method="post" action="/voters" enctype="multipart/form-data">
                     <!-- username -->
                     <div class="input-group mb-3">
                         <span class="input-group-text" id="basic-addon1">@</span>
@@ -40,13 +40,12 @@
                             placeholder="Password">
                         <label for="floatingPassword">Password</label>
                     </div>
-                    <!-- photo upload -->
-                    <!-- <div class="mb-3">
-                        <label for="formFileSm" class="form-label">Photo Upload</label>
-                        <input class="form-control form-control-sm" id="formFileSm" type="file">
-                    </div>
-                    <br> -->
                     <br>
+                    <!-- photo upload -->
+                    <div class="mb-3">
+                        <label for="formFileSm" class="form-label">Photo Upload</label>
+                        <input class="form-control form-control-sm" id="formFileSm" name="photo" type="file">
+                    </div>
                     <!-- submit -->
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
@@ -111,7 +110,7 @@
                                         <div class="container-fluid">
                                             <div class="row">
                                                 <div class="col-md-3">
-                                                    <img src="/photo/voters/<%= v._id %>.jpg" class="img-fluid">
+                                                    <img src="/photo/voters/<%= v.photo %>" class="img-fluid">
                                                 </div>
 
                                                 <div class="col-md">

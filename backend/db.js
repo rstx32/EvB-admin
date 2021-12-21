@@ -12,12 +12,13 @@ const getVoter = async () => {
 }
 
 // add voter
-const addVoter = (newVoter) => {
+const addVoter = (newVoter, photo) => {
   new Voter({
     username: newVoter.username,
-    email: newVoter.email,
     fullname: newVoter.fullname,
     password: CryptoJS.SHA256(newVoter.password).toString(),
+    email: newVoter.email,
+    photo: photo,
   }).save()
 }
 
