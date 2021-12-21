@@ -189,7 +189,7 @@
                                     <!-- modal body -->
                                     <div class="modal-body">
                                         <!-- form -->
-                                        <form method="post" action="/voters?_method=PUT">
+                                        <form method="post" action="/voters?_method=PUT" enctype="multipart/form-data">
                                             <!-- hidden input value -->
                                             <input type="hidden" name="id" value="<%= v._id %>">
                                             <input type="hidden" name="username" value="<%= v.username %>">
@@ -212,13 +212,13 @@
                                                     id="floatingPassword" placeholder="Password" required>
                                                 <label for="floatingPassword">New Password</label>
                                             </div>
-                                            <!-- photo upload -->
-                                            <!-- <div class="mb-3">
-        <label for="formFileSm" class="form-label">Photo Upload</label>
-        <input class="form-control form-control-sm" id="formFileSm" type="file">
-    </div>
-    <br> -->
                                             <br>
+                                            <!-- photo upload -->
+                                            <div class="mb-3">
+                                                <label for="formFileSm" class="form-label">Photo Upload</label>
+                                                <input class="form-control form-control-sm" id="formFileSm" name="photo"
+                                                    type="file">
+                                            </div>
                                             <!-- submit -->
                                             <button type="submit" class="btn btn-primary">Save</button>
                                         </form>

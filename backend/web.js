@@ -48,8 +48,8 @@ app.post('/voters', upload.single('photo'), (req, res) => {
 })
 
 // edit voters
-app.put('/voters', (req, res) => {
-  editVoter(req.body)
+app.put('/voters', upload.single('photo'), (req, res) => {
+  editVoter(req.body, req.file.filename)
   res.redirect('/voters')
 })
 

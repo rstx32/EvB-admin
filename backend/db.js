@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const CryptoJS = require('crypto-js')
 const { Voter } = require('./model/voter')
 const { ObjectId } = require('mongodb')
+const fs = require('fs')
 mongoose.connect(uri)
 
 // get all voter
@@ -12,13 +13,13 @@ const getVoter = async () => {
 }
 
 // add voter
-const addVoter = (newVoter, photo) => {
+const addVoter = (newVoter, newPhoto) => {
   new Voter({
     username: newVoter.username,
     fullname: newVoter.fullname,
     password: CryptoJS.SHA256(newVoter.password).toString(),
     email: newVoter.email,
-    photo: photo,
+    photo: newPhoto,
   }).save()
 }
 
@@ -30,7 +31,9 @@ const deleteVoter = async (id) => {
 }
 
 // edit voter
-const editVoter = async (newVoter) => {
+const editVoter = async (newVoter, newPhoto) => {
+  const oldPhoto = await getSingleVoter(newVoter.id)
+  
   await Voter.updateOne(
     {
       _id: ObjectId(newVoter.id),
@@ -41,9 +44,22 @@ const editVoter = async (newVoter) => {
         email: newVoter.email,
         fullname: newVoter.fullname,
         password: CryptoJS.SHA256(newVoter.password).toString(),
+        photo: newPhoto,
       },
     }
   )
+
+  fs.unlink(`public/photo/voters/${oldPhoto.photo}`, (err) => {
+    if (err) {
+      console.error(err)
+      return
+    }
+  })
+}
+
+// get a voter
+const getSingleVoter = async (id) => {
+  return await Voter.findById(id)
 }
 
 module.exports = {
