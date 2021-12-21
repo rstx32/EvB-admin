@@ -36,15 +36,15 @@ app.get('/voters', async (req, res) => {
 // add voters
 app.post('/voters', upload.single('photo'), (req, res) => {
   
-  const file = req.file
+  // error handling, later
+  // const file = req.file
   // if (!file) {
   //   const error = new Error('Please upload a file')
   //   error.httpStatusCode = 400
   //   console.log(error)
   // }
   addVoter(req.body, req.file.filename)
-  res.send(req.body)
-  // res.redirect('/voters')
+  res.redirect('/voters')
 })
 
 // edit voters
