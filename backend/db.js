@@ -29,6 +29,9 @@ const addVoter = (newVoter, newPhoto) => {
 
 // delete voter
 const deleteVoter = async (id) => {
+  // delete photo
+  deletePhoto(id)
+
   await Voter.deleteOne({
     _id: ObjectId(id),
   })
@@ -53,7 +56,12 @@ const editVoter = async (newVoter, newPhoto) => {
   )
 
   // delete old photo
-  const oldPhoto = await getSingleVoter(newVoter.id)
+  deletePhoto(newVoter.id)
+}
+
+// delete photo by voter.id
+const deletePhoto = async (id) => {
+  const oldPhoto = await getSingleVoter(id)
   fs.unlink(`public/photo/voters/${oldPhoto.photo}`, (err) => {
     if (err) {
       console.error(err)
