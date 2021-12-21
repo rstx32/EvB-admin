@@ -73,6 +73,7 @@ app.get('/candidates', (req, res) => {
   })
 })
 /////////////////////////////////////// end of candidates ////////////////////////////////////////
+
 // page not found
 app.use((req, res) => {
   res.status(404)
