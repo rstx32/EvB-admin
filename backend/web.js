@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
 
 /////////////////////////////////////////// voters ///////////////////////////////////////////
 // get all voters
-app.get('/voters', async (req, res) => {  
+app.get('/voters', async (req, res) => {
   const voters = await getVoter()
 
   res.render('voters', {
@@ -35,7 +35,6 @@ app.get('/voters', async (req, res) => {
 
 // add voters
 app.post('/voters', upload.single('photo'), (req, res) => {
-  
   // error handling, later
   // const file = req.file
   // if (!file) {
@@ -77,7 +76,10 @@ app.get('/candidates', (req, res) => {
 // page not found
 app.use((req, res) => {
   res.status(404)
-  res.send(`404 not found`)
+  res.render('404', {
+    layout: 'layouts/main-layout',
+    title: '404',
+  })
 })
 
 // listen on port random
