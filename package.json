@@ -8,10 +8,9 @@
   },
   "keywords": [
     "blockchain",
-    "mongodb",
     "e-voting"
   ],
-  "author": "rstx",
+  "author": "restu indera",
   "license": "ISC",
   "dependencies": {
     "crypto-js": "^4.1.1",
