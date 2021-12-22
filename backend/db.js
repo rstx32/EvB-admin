@@ -17,14 +17,14 @@ const getSingleVoter = async (id) => {
 }
 
 // add voter
-const addVoter = (newVoter, newPhoto) => {
-  new Voter({
+const addVoter = async (newVoter, newPhoto) => {
+  await Voter.create({
     username: newVoter.username,
     fullname: newVoter.fullname,
     password: CryptoJS.SHA256(newVoter.password).toString(),
     email: newVoter.email,
     photo: newPhoto,
-  }).save()
+  })
 }
 
 // delete voter
