@@ -4,6 +4,7 @@ const { upload } = require('./multer')
 const app = express()
 const { getVoter, addVoter, deleteVoter, editVoter } = require('./db')
 const methodOverride = require('method-override')
+const { validationRules, validate } = require('./validation')
 
 require('dotenv').config({ path: './backend/.env' })
 
@@ -34,17 +35,24 @@ app.get('/voters', async (req, res) => {
 })
 
 // add voters
-app.post('/voters', upload.single('photo'), (req, res) => {
-  // error handling, later
-  // const file = req.file
-  // if (!file) {
-  //   const error = new Error('Please upload a file')
-  //   error.httpStatusCode = 400
-  //   console.log(error)
-  // }
-  addVoter(req.body, req.file.filename)
-  res.redirect('/voters')
-})
+app.post(
+  '/voters',
+  // validationRules(),
+  // validate,
+  upload.single('photo'),
+  (req, res) => {
+    // error handling, later
+    // const file = req.file
+    // if (!file) {
+    //   const error = new Error('Please upload a file')
+    //   error.httpStatusCode = 400
+    //   console.log(error)
+    // }
+    addVoter(req.body, req.file)
+    res.redirect('/voters')
+    // res.send(file.filename)
+  }
+)
 
 // edit voters
 app.put('/voters', upload.single('photo'), (req, res) => {

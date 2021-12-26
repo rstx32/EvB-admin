@@ -2,7 +2,7 @@ require('dotenv').config({ path: './backend/.env' })
 const mongoose = require('mongoose')
 const CryptoJS = require('crypto-js')
 const fs = require('fs')
-const { Voter } = require('./model/voter')
+const Voter = require('./model/voter')
 const { ObjectId } = require('mongodb')
 mongoose.connect(`${process.env.MONGODB_URL}`)
 
@@ -18,13 +18,23 @@ const getSingleVoter = async (id) => {
 
 // add voter
 const addVoter = async (newVoter, newPhoto) => {
-  await Voter.create({
-    username: newVoter.username,
-    fullname: newVoter.fullname,
-    password: CryptoJS.SHA256(newVoter.password).toString(),
-    email: newVoter.email,
-    photo: newPhoto,
-  })
+  if (!newPhoto) {
+    await Voter.create({
+      username: newVoter.username,
+      fullname: newVoter.fullname,
+      password: CryptoJS.SHA256(newVoter.password).toString(),
+      email: newVoter.email,
+      photo: 'dummy.jpg',
+    })
+  } else {
+    await Voter.create({
+      username: newVoter.username,
+      fullname: newVoter.fullname,
+      password: CryptoJS.SHA256(newVoter.password).toString(),
+      email: newVoter.email,
+      photo: newPhoto.filename,
+    })
+  }
 }
 
 // delete voter
@@ -62,12 +72,16 @@ const editVoter = async (newVoter, newPhoto) => {
 // delete photo by voter.id
 const deletePhoto = async (id) => {
   const oldPhoto = await getSingleVoter(id)
-  fs.unlink(`public/photo/voters/${oldPhoto.photo}`, (err) => {
-    if (err) {
-      console.error(err)
-      return
-    }
-  })
+  if (oldPhoto.photo !== 'dummy.jpg') {
+    fs.unlink(`public/photo/voters/${oldPhoto.photo}`, (err) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+    })
+  } else {
+    return
+  }
 }
 
 module.exports = {

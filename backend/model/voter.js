@@ -18,6 +18,4 @@ const Voter = mongoose.model('Voter', {
   photo: String
 })
 
-module.exports = {
-  Voter,
-}
+module.exports = Voter
