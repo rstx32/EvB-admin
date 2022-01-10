@@ -4,7 +4,8 @@ const { upload } = require('./multer')
 const app = express()
 const { getVoter, addVoter, deleteVoter, editVoter } = require('./db')
 const methodOverride = require('method-override')
-const { validationRules, validate } = require('./validation')
+const { joiValidation } = require('./validation')
+const { escapeRegExpChars } = require('ejs/lib/utils')
 
 require('dotenv').config({ path: './backend/.env' })
 
@@ -35,24 +36,22 @@ app.get('/voters', async (req, res) => {
 })
 
 // add voters
-app.post(
-  '/voters',
-  // validationRules(),
-  // validate,
-  upload.single('photo'),
-  (req, res) => {
-    // error handling, later
-    // const file = req.file
-    // if (!file) {
-    //   const error = new Error('Please upload a file')
-    //   error.httpStatusCode = 400
-    //   console.log(error)
-    // }
-    addVoter(req.body, req.file)
+app.post('/voters', upload.single('photo'), async (req, res) => {
+  const { error, value } = joiValidation(req.body)
+  const voters = await getVoter()
+
+  if (error) {
+    res.status(400).render('voters', {
+      layout: 'layouts/main-layout',
+      title: 'voters',
+      errors: error.details,
+      voters,
+    })
+  } else {
+    addVoter(value, req.file)
     res.redirect('/voters')
-    // res.send(file.filename)
   }
-)
+})
 
 // edit voters
 app.put('/voters', upload.single('photo'), (req, res) => {
@@ -73,7 +72,7 @@ app.get('/backend/voters', async (req, res) => {
 })
 /////////////////////////////////////// end of voters ////////////////////////////////////////
 
-/////////////////////////////////////////// candidates ///////////////////////////////////////////
+//////////////////////////////////////// /// candidates ///////////////////////////////////////////
 app.get('/candidates', (req, res) => {
   res.render('candidates', {
     layout: 'layouts/main-layout',
