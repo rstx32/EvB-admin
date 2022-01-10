@@ -5,7 +5,6 @@ const app = express()
 const { getVoter, addVoter, deleteVoter, editVoter } = require('./db')
 const methodOverride = require('method-override')
 const { joiValidation } = require('./validation')
-const { escapeRegExpChars } = require('ejs/lib/utils')
 
 require('dotenv').config({ path: './backend/.env' })
 
