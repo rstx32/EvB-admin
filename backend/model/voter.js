@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 // schema voter
-const Voter = mongoose.model('Voter', {
+const voterSchema = mongoose.Schema({
   username: {
     type: String,
     required: true,
@@ -15,7 +15,10 @@ const Voter = mongoose.model('Voter', {
     required: true,
   },
   email: String,
-  photo: String
+  photo: String,
 })
+
+// model voter dengan menggunakan schema diatas
+const Voter = mongoose.model('Voter', voterSchema)
 
 module.exports = Voter
