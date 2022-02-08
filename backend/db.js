@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const fs = require('fs')
 const Voter = require('./model/voter')
 const { ObjectId } = require('mongodb')
+const { Duplex } = require('stream')
 mongoose.connect(`${process.env.MONGODB_URL}`)
 
 // get all voter
@@ -22,7 +23,6 @@ const addVoter = async (newVoter, newPhoto) => {
   const newFullname = newVoter.fullname
   const newPassword = await bcrypt.hash(newVoter.password, 8)
   const newEmail = newVoter.email
-  const newFilePhoto = newVoter.filename
 
   // if photo are none
   if (!newPhoto) {
@@ -41,7 +41,7 @@ const addVoter = async (newVoter, newPhoto) => {
       fullname: newFullname,
       password: newPassword,
       email: newEmail,
-      photo: newFilePhoto,
+      photo: newPhoto.filename,
     })
   }
 }
@@ -59,11 +59,11 @@ const deleteVoter = async (id) => {
 // edit voter
 const editVoter = async (newVoter, newPhoto) => {
   const newUsername = newVoter.username
+  const newEmail = newVoter.email
   const newFullname = newVoter.fullname
   const newPassword = await bcrypt.hash(newVoter.password, 8)
-  const newEmail = newVoter.email
 
-  // if photo are inserted, then update photo
+  // if photo are none
   if (!newPhoto) {
     await Voter.updateOne(
       {
@@ -75,13 +75,14 @@ const editVoter = async (newVoter, newPhoto) => {
           email: newEmail,
           fullname: newFullname,
           password: newPassword,
-          photo: newPhoto,
         },
       }
     )
   }
-  // if photo are none, then don't update
+  // if photo are inserted
   else {
+    // delete old photo
+    deletePhoto(newVoter.id)
     await Voter.updateOne(
       {
         _id: ObjectId(newVoter.id),
@@ -92,27 +93,25 @@ const editVoter = async (newVoter, newPhoto) => {
           email: newEmail,
           fullname: newFullname,
           password: newPassword,
+          photo: newPhoto.filename,
         },
       }
     )
   }
-
-  // delete old photo
-  deletePhoto(newVoter.id)
 }
 
 // delete photo by voter.id
 const deletePhoto = async (id) => {
   const oldPhoto = await getSingleVoter(id)
-  if (oldPhoto.photo !== 'dummy.jpg') {
+  if (!oldPhoto) {
+    return
+  } else if (oldPhoto.photo !== 'dummy.jpg') {
     fs.unlink(`public/photo/voters/${oldPhoto.photo}`, (err) => {
       if (err) {
         console.error(err)
         return
       }
     })
-  } else {
-    return
   }
 }
 
