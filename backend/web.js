@@ -54,7 +54,7 @@ app.post('/voters', upload.single('photo'), async (req, res) => {
 
 // edit voters
 app.put('/voters', upload.single('photo'), (req, res) => {
-  editVoter(req.body, req.file.filename)
+  editVoter(req.body, req.file)
   res.redirect('/voters')
 })
 

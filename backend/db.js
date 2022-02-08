@@ -18,22 +18,30 @@ const getSingleVoter = async (id) => {
 
 // add voter
 const addVoter = async (newVoter, newPhoto) => {
-  const password = await bcrypt.hash(newVoter.password, 8)
+  const newUsername = newVoter.username
+  const newFullname = newVoter.fullname
+  const newPassword = await bcrypt.hash(newVoter.password, 8)
+  const newEmail = newVoter.email
+  const newFilePhoto = newVoter.filename
+
+  // if photo are none
   if (!newPhoto) {
     await Voter.create({
-      username: newVoter.username,
-      fullname: newVoter.fullname,
-      password: password,
-      email: newVoter.email,
+      username: newUsername,
+      fullname: newFullname,
+      password: newPassword,
+      email: newEmail,
       photo: 'dummy.jpg',
     })
-  } else {
+  }
+  // if photo are inserted
+  else {
     await Voter.create({
-      username: newVoter.username,
-      fullname: newVoter.fullname,
-      password: password,
-      email: newVoter.email,
-      photo: newPhoto.filename,
+      username: newUsername,
+      fullname: newFullname,
+      password: newPassword,
+      email: newEmail,
+      photo: newFilePhoto,
     })
   }
 }
@@ -50,21 +58,44 @@ const deleteVoter = async (id) => {
 
 // edit voter
 const editVoter = async (newVoter, newPhoto) => {
-  // change voters with the new one
-  await Voter.updateOne(
-    {
-      _id: ObjectId(newVoter.id),
-    },
-    {
-      $set: {
-        username: newVoter.username,
-        email: newVoter.email,
-        fullname: newVoter.fullname,
-        password: bcrypt.hash(newVoter.password, 8),
-        photo: newPhoto,
+  const newUsername = newVoter.username
+  const newFullname = newVoter.fullname
+  const newPassword = await bcrypt.hash(newVoter.password, 8)
+  const newEmail = newVoter.email
+
+  // if photo are inserted, then update photo
+  if (!newPhoto) {
+    await Voter.updateOne(
+      {
+        _id: ObjectId(newVoter.id),
       },
-    }
-  )
+      {
+        $set: {
+          username: newUsername,
+          email: newEmail,
+          fullname: newFullname,
+          password: newPassword,
+          photo: newPhoto,
+        },
+      }
+    )
+  }
+  // if photo are none, then don't update
+  else {
+    await Voter.updateOne(
+      {
+        _id: ObjectId(newVoter.id),
+      },
+      {
+        $set: {
+          username: newUsername,
+          email: newEmail,
+          fullname: newFullname,
+          password: newPassword,
+        },
+      }
+    )
+  }
 
   // delete old photo
   deletePhoto(newVoter.id)
