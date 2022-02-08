@@ -1,6 +1,6 @@
 require('dotenv').config({ path: './backend/.env' })
 const mongoose = require('mongoose')
-const CryptoJS = require('crypto-js')
+const bcrypt = require('bcryptjs')
 const fs = require('fs')
 const Voter = require('./model/voter')
 const { ObjectId } = require('mongodb')
@@ -18,11 +18,12 @@ const getSingleVoter = async (id) => {
 
 // add voter
 const addVoter = async (newVoter, newPhoto) => {
+  const password = await bcrypt.hash(newVoter.password, 8)
   if (!newPhoto) {
     await Voter.create({
       username: newVoter.username,
       fullname: newVoter.fullname,
-      password: CryptoJS.SHA256(newVoter.password).toString(),
+      password: password,
       email: newVoter.email,
       photo: 'dummy.jpg',
     })
@@ -30,7 +31,7 @@ const addVoter = async (newVoter, newPhoto) => {
     await Voter.create({
       username: newVoter.username,
       fullname: newVoter.fullname,
-      password: CryptoJS.SHA256(newVoter.password).toString(),
+      password: password,
       email: newVoter.email,
       photo: newPhoto.filename,
     })
@@ -59,7 +60,7 @@ const editVoter = async (newVoter, newPhoto) => {
         username: newVoter.username,
         email: newVoter.email,
         fullname: newVoter.fullname,
-        password: CryptoJS.SHA256(newVoter.password).toString(),
+        password: bcrypt.hash(newVoter.password, 8),
         photo: newPhoto,
       },
     }
