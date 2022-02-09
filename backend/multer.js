@@ -16,10 +16,7 @@ const multerStorage = multer.diskStorage({
 // define filter
 // extenstion must be JPG / JPEG
 const multerFilter = (req, file, cb) => {
-  if (
-    file.mimetype.split('/')[1] === 'jpg' ||
-    file.mimetype.split('/')[1] === 'jpeg'
-  ) {
+  if (file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
     cb(null, true)
   } else {
     cb(new Error('Not a JPG File!'), false)
