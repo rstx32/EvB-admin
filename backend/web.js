@@ -40,7 +40,7 @@ app.post('/voters', upload.single('photo'), async (req, res) => {
   const voters = await getVoter()
 
   if (error) {
-    res.status(400).render('voters', {
+    return res.status(400).render('voters', {
       layout: 'layouts/main-layout',
       title: 'voters',
       errors: error.details,
@@ -52,10 +52,25 @@ app.post('/voters', upload.single('photo'), async (req, res) => {
   }
 })
 
+const photo = upload.single('editPhoto')
+
 // edit voters
-app.put('/voters', upload.single('photo'), (req, res) => {
-  editVoter(req.body, req.file)
-  res.redirect('/voters')
+app.put('/voters', async (req, res) => {
+  const voters = await getVoter()
+
+  photo(req, res, (err) => {
+    if (err) {
+      res.status(400).render('voters', {
+        layout: 'layouts/main-layout',
+        title: 'voters',
+        errors: 'invalid file!',
+        voters,
+      })
+    }else{
+      editVoter(req.body, req.file)
+      res.redirect('/voters')
+    }
+  })
 })
 
 // delete voters
