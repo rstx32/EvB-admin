@@ -3,8 +3,6 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const fs = require('fs')
 const Voter = require('./model/voter')
-const { ObjectId } = require('mongodb')
-const { Duplex } = require('stream')
 mongoose.connect(`${process.env.MONGODB_URL}`)
 
 // get all voter
@@ -13,8 +11,8 @@ const getVoter = async () => {
 }
 
 // get a voter
-const getSingleVoter = async (id) => {
-  return await Voter.findById(id)
+const getSingleVoter = async (userName) => {
+  return await Voter.findOne({ username: userName })
 }
 
 // add voter
@@ -47,12 +45,12 @@ const addVoter = async (newVoter, newPhoto) => {
 }
 
 // delete voter
-const deleteVoter = async (id) => {
+const deleteVoter = async (userName) => {
   // delete photo
-  deletePhoto(id)
+  deletePhoto(userName)
 
   await Voter.deleteOne({
-    _id: ObjectId(id),
+    username: userName,
   })
 }
 
@@ -67,11 +65,10 @@ const editVoter = async (newVoter, newPhoto) => {
   if (!newPhoto) {
     await Voter.updateOne(
       {
-        _id: ObjectId(newVoter.id),
+        username: newUsername,
       },
       {
         $set: {
-          username: newUsername,
           email: newEmail,
           fullname: newFullname,
           password: newPassword,
@@ -82,14 +79,13 @@ const editVoter = async (newVoter, newPhoto) => {
   // if photo are inserted
   else {
     // delete old photo
-    deletePhoto(newVoter.id)
+    deletePhoto(newUsername)
     await Voter.updateOne(
       {
-        _id: ObjectId(newVoter.id),
+        username: newUsername,
       },
       {
         $set: {
-          username: newUsername,
           email: newEmail,
           fullname: newFullname,
           password: newPassword,
@@ -101,8 +97,8 @@ const editVoter = async (newVoter, newPhoto) => {
 }
 
 // delete photo by voter.id
-const deletePhoto = async (id) => {
-  const oldPhoto = await getSingleVoter(id)
+const deletePhoto = async (userName) => {
+  const oldPhoto = await getSingleVoter(userName)
   if (!oldPhoto) {
     return
   } else if (oldPhoto.photo !== 'dummy.jpg') {
