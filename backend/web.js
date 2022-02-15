@@ -5,7 +5,7 @@ const app = express()
 const { getVoter, addVoter, deleteVoter, editVoter } = require('./db')
 const methodOverride = require('method-override')
 const { joiValidation } = require('./validation')
-const photo = upload.single('editPhoto')
+const photo = upload.single('photo')
 
 require('dotenv').config({ path: './backend/.env' })
 
@@ -36,27 +36,8 @@ app.get('/voters', async (req, res) => {
 })
 
 // add voters
-app.post('/voters', upload.single('photo'), async (req, res) => {
-  const { error, value } = joiValidation(req.body)
-  const voters = await getVoter()
-
-  if (error) {
-    return res.status(400).render('voters', {
-      layout: 'layouts/main-layout',
-      title: 'voters',
-      errors: error.details,
-      voters,
-    })
-  } else {
-    addVoter(value, req.file)
-    res.redirect('/voters')
-  }
-})
-
-// edit voters
-app.put('/voters', async (req, res) => {
-  const voters = await getVoter()
-
+app.post('/voters', async (req, res) => {
+  // multer upload file foto
   photo(req, res, (err) => {
     if (err) {
       return res.status(400).render('voters', {
@@ -67,19 +48,50 @@ app.put('/voters', async (req, res) => {
       })
     }
 
+    const voters = await getVoter()
     const { error, value } = joiValidation(req.body)
+
     if (error) {
-      console.log(error)
       return res.status(400).render('voters', {
         layout: 'layouts/main-layout',
         title: 'voters',
         errors: error.details,
         voters,
       })
+    } else {
+      addVoter(value, req.file)
+      res.redirect('/voters')
+    }
+  })
+})
+
+// edit voters
+app.put('/voters', async (req, res) => {
+  // multer upload file foto
+  photo(req, res, (err) => {
+    if (err) {
+      return res.status(400).render('voters', {
+        layout: 'layouts/main-layout',
+        title: 'voters',
+        errors: 'invalid file!',
+        voters,
+      })
     }
 
-    editVoter(value, req.file)
-    res.redirect('/voters')
+    const voters = await getVoter()
+    const { error, value } = joiValidation(req.body)
+
+    if (error) {
+      res.status(400).render('voters', {
+        layout: 'layouts/main-layout',
+        title: 'voters',
+        errors: error.details,
+        voters,
+      })
+    } else {
+      editVoter(value, req.file)
+      res.redirect('/voters')
+    }
   })
 })
 
