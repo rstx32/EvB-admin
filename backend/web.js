@@ -5,6 +5,7 @@ const app = express()
 const { getVoter, addVoter, deleteVoter, editVoter } = require('./db')
 const methodOverride = require('method-override')
 const { joiValidation } = require('./validation')
+const photo = upload.single('editPhoto')
 
 require('dotenv').config({ path: './backend/.env' })
 
@@ -52,30 +53,39 @@ app.post('/voters', upload.single('photo'), async (req, res) => {
   }
 })
 
-const photo = upload.single('editPhoto')
-
 // edit voters
 app.put('/voters', async (req, res) => {
   const voters = await getVoter()
 
   photo(req, res, (err) => {
     if (err) {
-      res.status(400).render('voters', {
+      return res.status(400).render('voters', {
         layout: 'layouts/main-layout',
         title: 'voters',
         errors: 'invalid file!',
         voters,
       })
-    }else{
-      editVoter(req.body, req.file)
-      res.redirect('/voters')
     }
+
+    const { error, value } = joiValidation(req.body)
+    if (error) {
+      console.log(error)
+      return res.status(400).render('voters', {
+        layout: 'layouts/main-layout',
+        title: 'voters',
+        errors: error.details,
+        voters,
+      })
+    }
+
+    editVoter(value, req.file)
+    res.redirect('/voters')
   })
 })
 
 // delete voters
 app.delete('/voters', (req, res) => {
-  deleteVoter(req.body.id)
+  deleteVoter(req.body.username)
   res.redirect('/voters')
 })
 
