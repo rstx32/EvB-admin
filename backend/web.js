@@ -170,6 +170,12 @@ app.delete('/candidates', (req, res) => {
   deleteCandidate(req.body.id)
   res.redirect('/candidates')
 })
+
+// API export voters
+app.get('/backend/candidates', async (req, res) => {
+  const voters = await getCandidate()
+  res.json(voters)
+})
 /////////////////////////////////////// end of candidates ////////////////////////////////////////
 
 // page not found
