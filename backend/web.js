@@ -1,19 +1,30 @@
+require('dotenv').config({ path: './backend/.env' })
 const express = require('express')
 const expressLayouts = require('express-ejs-layouts')
-const { upload } = require('./multer')
-const app = express()
-const { getVoter, addVoter, deleteVoter, editVoter } = require('./db')
 const methodOverride = require('method-override')
-const { joiValidation } = require('./validation')
-const photo = upload.single('photo')
+const bodyParser = require('body-parser')
+const app = express()
+  .set('view engine', 'ejs')
+  .use(bodyParser.urlencoded({ extended: true }))
+  .use(expressLayouts)
+  .use(express.static('public'))
+  .use(methodOverride('_method'))
 
-require('dotenv').config({ path: './backend/.env' })
-
-app.set('view engine', 'ejs')
-app.use(expressLayouts)
-app.use(express.static('public'))
-app.use(express.urlencoded({ extended: true }))
-app.use(methodOverride('_method'))
+const { voterUpload, candidateUpload } = require('./multer')
+const {
+  voterCount,
+  getVoter,
+  addVoter,
+  deleteVoter,
+  editVoter,
+  candidateCount,
+  getCandidate,
+  addCandidate,
+  deleteCandidate,
+} = require('./db')
+const { voterValidation, candidateValidation } = require('./validation')
+const voterPhoto = voterUpload.single('voterPhotoUpload')
+const candidatePhoto = candidateUpload.single('candidatePhotoUpload')
 
 // root page
 app.get('/', (req, res) => {
@@ -26,31 +37,33 @@ app.get('/', (req, res) => {
 /////////////////////////////////////////// voters ///////////////////////////////////////////
 // get all voters
 app.get('/voters', async (req, res) => {
+  const allVoters = await voterCount()
   const voters = await getVoter()
 
   res.render('voters', {
     layout: 'layouts/main-layout',
     title: 'voters',
     voters,
+    allVoters,
   })
 })
 
 // add voters
 app.post('/voters', async (req, res) => {
+  const voters = await getVoter()
+
   // multer upload file foto
-  photo(req, res, (err) => {
+  voterPhoto(req, res, (err) => {
     if (err) {
       return res.status(400).render('voters', {
         layout: 'layouts/main-layout',
         title: 'voters',
-        errors: 'invalid file!',
+        errors: 'invalid photo file!',
         voters,
       })
     }
 
-    const voters = await getVoter()
-    const { error, value } = joiValidation(req.body)
-
+    const { error, value } = voterValidation(req.body)
     if (error) {
       return res.status(400).render('voters', {
         layout: 'layouts/main-layout',
@@ -67,8 +80,11 @@ app.post('/voters', async (req, res) => {
 
 // edit voters
 app.put('/voters', async (req, res) => {
+  const voters = await getVoter()
+  const { error, value } = voterValidation(req.body)
+
   // multer upload file foto
-  photo(req, res, (err) => {
+  voterPhoto(req, res, (err) => {
     if (err) {
       return res.status(400).render('voters', {
         layout: 'layouts/main-layout',
@@ -77,9 +93,6 @@ app.put('/voters', async (req, res) => {
         voters,
       })
     }
-
-    const voters = await getVoter()
-    const { error, value } = joiValidation(req.body)
 
     if (error) {
       res.status(400).render('voters', {
@@ -109,11 +122,53 @@ app.get('/backend/voters', async (req, res) => {
 /////////////////////////////////////// end of voters ////////////////////////////////////////
 
 //////////////////////////////////////// /// candidates ///////////////////////////////////////////
-app.get('/candidates', (req, res) => {
+// get all candidates
+app.get('/candidates', async (req, res) => {
+  const allCandidates = await candidateCount()
+  const candidate = await getCandidate()
+
   res.render('candidates', {
     layout: 'layouts/main-layout',
     title: 'candidates',
+    candidate,
+    allCandidates,
   })
+})
+
+// add candidates
+app.post('/candidates', async (req, res) => {
+  const candidate = await getCandidate()
+
+  // multer upload file foto
+  candidatePhoto(req, res, (err) => {
+    if (err) {
+      return res.status(400).render('candidates', {
+        layout: 'layouts/main-layout',
+        title: 'candidates',
+        errors: 'invalid photo file!',
+        candidate,
+      })
+    }
+
+    const { error, value } = candidateValidation(req.body)
+    if (error) {
+      return res.status(400).render('candidates', {
+        layout: 'layouts/main-layout',
+        title: 'candidates',
+        errors: error.details,
+        candidate,
+      })
+    } else {
+      addCandidate(value, req.file)
+      res.redirect('/candidates')
+    }
+  })
+})
+
+// delete voters
+app.delete('/candidates', (req, res) => {
+  deleteCandidate(req.body.id)
+  res.redirect('/candidates')
 })
 /////////////////////////////////////// end of candidates ////////////////////////////////////////
 

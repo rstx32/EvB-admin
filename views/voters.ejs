@@ -14,6 +14,8 @@
             <i class="bi bi-person-plus"> Add Voter</i>
         </button>
 
+        total voters : <%= allVoters %> 
+
         <!-- modal box add voter -->
         <div class="modal fade" id="addVoter" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -55,7 +57,8 @@
                             <!-- photo upload -->
                             <div class="mb-3">
                                 <label for="formFileSm" class="form-label">Photo Upload</label>
-                                <input class="form-control form-control-sm" id="formFileSm" name="photo" type="file">
+                                <input class="form-control form-control-sm" id="formFileSm" name="voterPhotoUpload"
+                                    type="file">
                             </div>
                             <!-- submit -->
                             <button type="submit" class="btn btn-primary">Submit</button>
@@ -106,7 +109,7 @@
                                 <!-- modal box detail voter -->
                                 <div class="modal fade" id="modal<%= v._id %>" tabindex="-1"
                                     aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-dialog modal-dialog-centered modal-xl">
                                         <div class="modal-content">
                                             <!-- modal header -->
                                             <div class="modal-header">
@@ -120,7 +123,7 @@
                                             <div class="modal-body">
                                                 <div class="container-fluid">
                                                     <div class="row">
-                                                        <div class="col-md-3">
+                                                        <div class="col-md-2">
                                                             <img src="/photo/voters/<%= v.photo %>" class="img-fluid">
                                                         </div>
 
