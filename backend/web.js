@@ -3,12 +3,24 @@ const express = require('express')
 const expressLayouts = require('express-ejs-layouts')
 const methodOverride = require('method-override')
 const bodyParser = require('body-parser')
+const passport = require('passport')
+const session = require('express-session')
+const connectEnsureLogin = require('connect-ensure-login')
 const app = express()
   .set('view engine', 'ejs')
-  .use(bodyParser.urlencoded({ extended: true }))
+  .use(express.urlencoded({ extended: false }))
   .use(expressLayouts)
   .use(express.static('public'))
   .use(methodOverride('_method'))
+  .use(
+    session({
+      secret: process.env.SECRET,
+      resave: false,
+      saveUninitialized: true,
+    })
+  )
+  .use(passport.initialize())
+  .use(passport.session())
 
 const { voterUpload, candidateUpload } = require('./multer')
 const {
@@ -25,9 +37,39 @@ const {
 const { voterValidation, candidateValidation } = require('./validation')
 const voterPhoto = voterUpload.single('voterPhotoUpload')
 const candidatePhoto = candidateUpload.single('candidatePhotoUpload')
+const User = require('./model/user')
+
+passport.use(User.createStrategy())
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
+
+// login page
+app.get('/login', (req, res) => {
+  res.render('login', {
+    layout: 'login',
+    title: 'login',
+  })
+})
+
+app.post(
+  '/login',
+  passport.authenticate('local', {
+    failureRedirect: '/login',
+    successRedirect: '/',
+  }),
+  (req, res) => {
+    console.log(req.user)
+  }
+)
+
+// logout
+app.get('/logout', (req, res) => {
+  req.logout()
+  res.redirect('/login')
+})
 
 // root page
-app.get('/', (req, res) => {
+app.get('/', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   res.render('index', {
     layout: 'layouts/main-layout',
     title: 'homepage',
@@ -36,7 +78,7 @@ app.get('/', (req, res) => {
 
 /////////////////////////////////////////// voters ///////////////////////////////////////////
 // get all voters
-app.get('/voters', async (req, res) => {
+app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const allVoters = await voterCount()
   const voters = await getVoter()
 
@@ -123,7 +165,7 @@ app.get('/backend/voters', async (req, res) => {
 
 //////////////////////////////////////// /// candidates ///////////////////////////////////////////
 // get all candidates
-app.get('/candidates', async (req, res) => {
+app.get('/candidates', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const allCandidates = await candidateCount()
   const candidate = await getCandidate()
 
@@ -187,9 +229,12 @@ app.use((req, res) => {
   })
 })
 
-// listen on port random
+// listen on defined port
 app.listen(process.env.HTTP_PORT, () => {
   console.log(
     `EvB Admin listening on port http://localhost:${process.env.HTTP_PORT}/`
   )
 })
+
+// run this for first time!
+// User.register({username: 'user', active: false}, '123')
