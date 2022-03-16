@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 // schema voter
 const voterSchema = mongoose.Schema({
-  username: {
+  email: {
     type: String,
     required: true,
   },
@@ -14,7 +14,7 @@ const voterSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  email: String,
+  public_key: String,
   photo: String,
 })
 
