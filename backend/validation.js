@@ -3,18 +3,6 @@ const Joi = require('joi')
 const voterValidation = (voter) => {
   // schema untuk formulir terdiri dari 4 form string : username, fullname, email, password
   const schema = Joi.object({
-    username: Joi.string()
-      .lowercase()
-      .pattern(new RegExp('^[a-zA-Z0-9_]*$'))
-      .min(4)
-      .max(8)
-      .required()
-      .messages({
-        'string.pattern.base': `username hanya diperbolehkan menggunakan alfanumerik dan underscore`,
-        'string.empty': `username tidak boleh kosong`,
-        'string.min': `username minimal {#limit} karakter`,
-        'string.max': `username maksimal {#limit} karakter`,
-      }),
     fullname: Joi.string()
       .pattern(new RegExp('^[a-zA-Z ]*$'))
       .required()
@@ -23,13 +11,11 @@ const voterValidation = (voter) => {
         'string.empty': `fullname tidak boleh kosong`,
       }),
     email: Joi.string().email().required(),
-    password: Joi.string()
-    .min(5)
-    .required()
-    .messages({
+    password: Joi.string().min(5).required().messages({
       'string.empty': `password tidak boleh kosong`,
       'string.min': `password minimal {#limit} karakter`,
     }),
+    public_key: Joi.string(),
   })
   // abortearly : biar semua error tampil dalam array
   return schema.validate(voter, { abortEarly: false })
@@ -45,7 +31,7 @@ const candidateValidation = (candidate) => {
         'string.pattern.base': `nama kandidat hanya diperbolehkan alfabet dan spasi`,
         'string.empty': `nama kandidat tidak boleh kosong`,
       }),
-      viceCandidate: Joi.string()
+    viceCandidate: Joi.string()
       .pattern(new RegExp('^[a-zA-Z ]*$'))
       .required()
       .messages({

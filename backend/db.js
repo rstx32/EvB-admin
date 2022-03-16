@@ -19,13 +19,12 @@ const getVoter = async () => {
 }
 
 // get a voter
-const getSingleVoter = async (userName) => {
-  return await Voter.findOne({ username: userName })
+const getSingleVoter = async (Email) => {
+  return await Voter.findOne({ email: Email })
 }
 
 // add voter
 const addVoter = async (newVoter, newPhoto) => {
-  const newUsername = newVoter.username
   const newFullname = newVoter.fullname
   const newPassword = await bcrypt.hash(newVoter.password, 8)
   const newEmail = newVoter.email
@@ -33,38 +32,37 @@ const addVoter = async (newVoter, newPhoto) => {
   // if photo are none
   if (!newPhoto) {
     await Voter.create({
-      username: newUsername,
       fullname: newFullname,
       password: newPassword,
       email: newEmail,
+      public_key: "",
       photo: 'dummy.jpg',
     })
   }
   // if photo are inserted
   else {
     await Voter.create({
-      username: newUsername,
       fullname: newFullname,
       password: newPassword,
       email: newEmail,
+      public_key: "",
       photo: newPhoto.filename,
     })
   }
 }
 
 // delete voter
-const deleteVoter = async (userName) => {
+const deleteVoter = async (newEmail) => {
   // delete photo
-  deletePhotoVoter(userName)
+  deletePhotoVoter(newEmail)
 
   await Voter.deleteOne({
-    username: userName,
+    email: newEmail,
   })
 }
 
 // edit voter
 const editVoter = async (newVoter, newPhoto) => {
-  const newUsername = newVoter.username
   const newEmail = newVoter.email
   const newFullname = newVoter.fullname
   const newPassword = await bcrypt.hash(newVoter.password, 8)
@@ -73,11 +71,10 @@ const editVoter = async (newVoter, newPhoto) => {
   if (!newPhoto) {
     await Voter.updateOne(
       {
-        username: newUsername,
+        email: newEmail,
       },
       {
         $set: {
-          email: newEmail,
           fullname: newFullname,
           password: newPassword,
         },
@@ -90,11 +87,10 @@ const editVoter = async (newVoter, newPhoto) => {
     deletePhoto(newUsername)
     await Voter.updateOne(
       {
-        username: newUsername,
+        email: newEmail,
       },
       {
         $set: {
-          email: newEmail,
           fullname: newFullname,
           password: newPassword,
           photo: newPhoto.filename,
@@ -105,8 +101,8 @@ const editVoter = async (newVoter, newPhoto) => {
 }
 
 // delete photo
-const deletePhotoVoter = async (userName) => {
-  const oldPhoto = await getSingleVoter(userName)
+const deletePhotoVoter = async (email) => {
+  const oldPhoto = await getSingleVoter(email)
   if (!oldPhoto) {
     return
   } else if (oldPhoto.photo !== 'dummy.jpg') {
