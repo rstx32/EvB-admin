@@ -12,9 +12,12 @@ const voterSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    default: "has not set yet",
   },
-  public_key: String,
+  public_key: {
+    type: String,
+    default: null,
+  },
   photo: String,
 })
 

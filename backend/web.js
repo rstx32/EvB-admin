@@ -8,7 +8,7 @@ const session = require('express-session')
 const connectEnsureLogin = require('connect-ensure-login')
 const app = express()
   .set('view engine', 'ejs')
-  .use(express.urlencoded({ extended: false }))
+  .use(express.urlencoded({ extended: true }))
   .use(expressLayouts)
   .use(express.static('public'))
   .use(methodOverride('_method'))
@@ -29,6 +29,7 @@ const {
   addVoter,
   deleteVoter,
   editVoter,
+  addPubKey,
   candidateCount,
   getCandidate,
   addCandidate,
@@ -42,6 +43,19 @@ const User = require('./model/user')
 passport.use(User.createStrategy())
 passport.serializeUser(User.serializeUser())
 passport.deserializeUser(User.deserializeUser())
+
+// register page
+app.get('/register', (req, res) => {
+  res.render('register', {
+    layout: 'register',
+    title: 'register',
+  })
+})
+
+app.post('/register', async (req, res) => {
+  const test = await addPubKey(req.body)
+  res.send(test)
+})
 
 // login page
 app.get('/login', (req, res) => {
@@ -91,7 +105,8 @@ app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 })
 
 // add voters
-app.post('/voters', async (req, res) => {
+app.post('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  const allVoters = await voterCount()
   const voters = await getVoter()
 
   // multer upload file foto
@@ -102,6 +117,7 @@ app.post('/voters', async (req, res) => {
         title: 'voters',
         errors: 'invalid photo file!',
         voters,
+        allVoters,
       })
     }
 
@@ -112,6 +128,7 @@ app.post('/voters', async (req, res) => {
         title: 'voters',
         errors: error.details,
         voters,
+        allVoters,
       })
     } else {
       addVoter(value, req.file)
@@ -121,9 +138,9 @@ app.post('/voters', async (req, res) => {
 })
 
 // edit voters
-app.put('/voters', async (req, res) => {
+app.put('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const voters = await getVoter()
-  const { error, value } = voterValidation(req.body)
+  const allVoters = await voterCount()
 
   // multer upload file foto
   voterPhoto(req, res, (err) => {
@@ -133,15 +150,18 @@ app.put('/voters', async (req, res) => {
         title: 'voters',
         errors: 'invalid file!',
         voters,
+        allVoters,
       })
     }
 
+    const { error, value } = voterValidation(req.body)
     if (error) {
       res.status(400).render('voters', {
         layout: 'layouts/main-layout',
         title: 'voters',
         errors: error.details,
         voters,
+        allVoters,
       })
     } else {
       editVoter(value, req.file)
@@ -151,8 +171,8 @@ app.put('/voters', async (req, res) => {
 })
 
 // delete voters
-app.delete('/voters', (req, res) => {
-  deleteVoter(req.body.username)
+app.delete('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
+  deleteVoter(req.body.email)
   res.redirect('/voters')
 })
 
@@ -165,17 +185,21 @@ app.get('/backend/voters', async (req, res) => {
 
 //////////////////////////////////////// /// candidates ///////////////////////////////////////////
 // get all candidates
-app.get('/candidates', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  const allCandidates = await candidateCount()
-  const candidate = await getCandidate()
+app.get(
+  '/candidates',
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    const allCandidates = await candidateCount()
+    const candidate = await getCandidate()
 
-  res.render('candidates', {
-    layout: 'layouts/main-layout',
-    title: 'candidates',
-    candidate,
-    allCandidates,
-  })
-})
+    res.render('candidates', {
+      layout: 'layouts/main-layout',
+      title: 'candidates',
+      candidate,
+      allCandidates,
+    })
+  }
+)
 
 // add candidates
 app.post('/candidates', async (req, res) => {

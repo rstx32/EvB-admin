@@ -11,7 +11,7 @@ const voterValidation = (voter) => {
         'string.empty': `fullname tidak boleh kosong`,
       }),
     email: Joi.string().email().required(),
-    password: Joi.string().min(5).required().messages({
+    password: Joi.string().min(5).messages({
       'string.empty': `password tidak boleh kosong`,
       'string.min': `password minimal {#limit} karakter`,
     }),

@@ -26,16 +26,13 @@ const getSingleVoter = async (Email) => {
 // add voter
 const addVoter = async (newVoter, newPhoto) => {
   const newFullname = newVoter.fullname
-  const newPassword = await bcrypt.hash(newVoter.password, 8)
   const newEmail = newVoter.email
 
   // if photo are none
   if (!newPhoto) {
     await Voter.create({
       fullname: newFullname,
-      password: newPassword,
       email: newEmail,
-      public_key: "",
       photo: 'dummy.jpg',
     })
   }
@@ -43,9 +40,7 @@ const addVoter = async (newVoter, newPhoto) => {
   else {
     await Voter.create({
       fullname: newFullname,
-      password: newPassword,
       email: newEmail,
-      public_key: "",
       photo: newPhoto.filename,
     })
   }
@@ -112,6 +107,31 @@ const deletePhotoVoter = async (email) => {
         return
       }
     })
+  }
+}
+
+// add public_key
+const addPubKey = async (voter) => {
+  const voterEmail = voter.email
+  const voterPassword = await bcrypt.hash(voter.password, 8)
+  const pubKey = voter.public_key
+  const isExist = getSingleVoter(voterEmail)
+  
+  // check if public key is filled or not
+  if (isExist.public_key !== null) {
+    return 'public key sudah diisi!'
+  } else {
+    await Voter.updateOne(
+      {
+        email: voterEmail,
+      },
+      {
+        $set: {
+          public_key: pubKey,
+          password: voterPassword,
+        },
+      }
+    )
   }
 }
 
@@ -189,6 +209,7 @@ module.exports = {
   addVoter,
   deleteVoter,
   editVoter,
+  addPubKey,
   candidateCount,
   getCandidate,
   addCandidate,
