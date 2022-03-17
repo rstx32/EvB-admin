@@ -2,13 +2,12 @@ require('dotenv').config({ path: './backend/.env' })
 const express = require('express')
 const expressLayouts = require('express-ejs-layouts')
 const methodOverride = require('method-override')
-const bodyParser = require('body-parser')
 const passport = require('passport')
 const session = require('express-session')
 const connectEnsureLogin = require('connect-ensure-login')
 const app = express()
   .set('view engine', 'ejs')
-  .use(express.urlencoded({ extended: true }))
+  .use(express.urlencoded({ extended: false }))
   .use(expressLayouts)
   .use(express.static('public'))
   .use(methodOverride('_method'))
@@ -54,7 +53,14 @@ app.get('/register', (req, res) => {
 
 app.post('/register', async (req, res) => {
   const test = await addPubKey(req.body)
-  res.send(test)
+  if (!test) {
+    res.render('register', {
+      layout: 'register',
+      error: 'public key already filled!',
+    })
+  } else {
+    res.redirect('/register')
+  }
 })
 
 // login page
