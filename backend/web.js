@@ -72,9 +72,9 @@ app.post('/register', async (req, res) => {
 
 app.post('/register2', async (req, res) => {
   const isSucced = await addPubKey(req.body)
-  if(isSucced){
+  if (isSucced) {
     res.send('registration success')
-  }else{
+  } else {
     res.render('register', {
       layout: 'register',
       error: `${req.body.email} has been registered!`,
@@ -227,37 +227,41 @@ app.get(
 )
 
 // add candidates
-app.post('/candidates', async (req, res) => {
-  const candidate = await getCandidate()
+app.post(
+  '/candidates',
+  connectEnsureLogin.ensureLoggedIn(),
+  async (req, res) => {
+    const candidate = await getCandidate()
 
-  // multer upload file foto
-  candidatePhoto(req, res, (err) => {
-    if (err) {
-      return res.status(400).render('candidates', {
-        layout: 'layouts/main-layout',
-        title: 'candidates',
-        errors: 'invalid photo file!',
-        candidate,
-      })
-    }
+    // multer upload file foto
+    candidatePhoto(req, res, (err) => {
+      if (err) {
+        return res.status(400).render('candidates', {
+          layout: 'layouts/main-layout',
+          title: 'candidates',
+          errors: 'invalid photo file!',
+          candidate,
+        })
+      }
 
-    const { error, value } = candidateValidation(req.body)
-    if (error) {
-      return res.status(400).render('candidates', {
-        layout: 'layouts/main-layout',
-        title: 'candidates',
-        errors: error.details,
-        candidate,
-      })
-    } else {
-      addCandidate(value, req.file)
-      res.redirect('/candidates')
-    }
-  })
-})
+      const { error, value } = candidateValidation(req.body)
+      if (error) {
+        return res.status(400).render('candidates', {
+          layout: 'layouts/main-layout',
+          title: 'candidates',
+          errors: error.details,
+          candidate,
+        })
+      } else {
+        addCandidate(value, req.file)
+        res.redirect('/candidates')
+      }
+    })
+  }
+)
 
 // delete voters
-app.delete('/candidates', (req, res) => {
+app.delete('/candidates', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   deleteCandidate(req.body.id)
   res.redirect('/candidates')
 })
@@ -273,8 +277,8 @@ app.get('/backend/candidates', async (req, res) => {
 app.use((req, res) => {
   res.status(404)
   res.render('404', {
-    layout: 'layouts/main-layout',
-    title: '404',
+    layout: '404',
+    title: 'Page not found!',
   })
 })
 
@@ -285,5 +289,5 @@ app.listen(process.env.HTTP_PORT, () => {
   )
 })
 
-// run this for first time!
+// run this for the first time!
 // User.register({username: 'user', active: false}, '123')
