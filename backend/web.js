@@ -26,9 +26,11 @@ const {
   voterCount,
   getVoter,
   addVoter,
+  getSingleVoter,
   deleteVoter,
   editVoter,
   addPubKey,
+  isPubkeyExist,
   candidateCount,
   getCandidate,
   addCandidate,
@@ -52,14 +54,31 @@ app.get('/register', (req, res) => {
 })
 
 app.post('/register', async (req, res) => {
-  const test = await addPubKey(req.body)
-  if (!test) {
+  const status = await isPubkeyExist(req.body.email)
+  const voter = await getSingleVoter(req.body.email)
+
+  if (status) {
     res.render('register', {
       layout: 'register',
-      error: 'public key already filled!',
+      error: `${req.body.email} has been registered!`,
     })
   } else {
-    res.redirect('/register')
+    res.render('register-2', {
+      layout: 'register-2',
+      voter,
+    })
+  }
+})
+
+app.post('/register2', async (req, res) => {
+  const isSucced = await addPubKey(req.body)
+  if(isSucced){
+    res.send('registration success')
+  }else{
+    res.render('register', {
+      layout: 'register',
+      error: `${req.body.email} has been registered!`,
+    })
   }
 })
 
