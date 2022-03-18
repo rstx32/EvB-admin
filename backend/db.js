@@ -110,16 +110,25 @@ const deletePhotoVoter = async (email) => {
   }
 }
 
+// check if pubkey has filled or not
+const isPubkeyExist = async (email) => {
+  const voter = await getSingleVoter(email)
+  if (voter.public_key !== null) {
+    return true
+  } else {
+    return false
+  }
+}
+
 // add public_key
 const addPubKey = async (voter) => {
   const voterEmail = voter.email
   const voterPassword = await bcrypt.hash(voter.password, 8)
   const pubKey = voter.public_key
-  const isExist = getSingleVoter(voterEmail)
-  
-  // check if public key is filled or not
-  if (isExist.public_key !== null) {
-    return 'public key sudah diisi!'
+
+  const status = await isPubkeyExist(voter.email)
+  if (status) {
+    return false
   } else {
     await Voter.updateOne(
       {
@@ -132,6 +141,7 @@ const addPubKey = async (voter) => {
         },
       }
     )
+    return true
   }
 }
 
@@ -206,10 +216,12 @@ const deletePhotoCandidate = async (id) => {
 module.exports = {
   voterCount,
   getVoter,
+  getSingleVoter,
   addVoter,
   deleteVoter,
   editVoter,
   addPubKey,
+  isPubkeyExist,
   candidateCount,
   getCandidate,
   addCandidate,
