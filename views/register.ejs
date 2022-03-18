@@ -74,82 +74,27 @@
             <img class="mb-4" src="/EvB.png" alt="" width="120" height="120">
             <h1 class="h3 mb-3 fw-normal">EvB Voter Registration</h1>
 
+            <% if (typeof error !='undefined' ) { %>
+                <div class="alert alert-danger" role="alert" id="errorMessage">
+                    <%= error %>
+                </div>
+                <% } %>
+                
             <div class="form-floating">
                 <input name="email" id="email" type="email" class="form-control" placeholder="Email">
                 <label for="floatingInput">Email</label>
             </div>
-            <div class="form-floating">
-                <input name="password" id="password" type="password" class="form-control" placeholder="Password">
-                <label for="floatingPassword">Password</label>
-            </div>
-            <div class="form-floating">
-                <input name="confirmPassword" id="confirmPassword" type="password" class="form-control"
-                    placeholder="Confirm Password">
-                <label for="floatingPassword">Confirm Password</label>
-            </div>
-            <input type="hidden" name="public_key" id="public_key">
 
-            <div id="passwordMatch"></div>
-            <input type="button" onclick="isMatch()" value="Register" class="w-100 btn btn-lg btn-primary">
-            <p class="mt-5 mb-3 text-muted">&copy; 2017–2021</p>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+            <p class="mt-5 mb-3 text-muted">&copy; rstx</p>
         </form>
-
     </main>
 
     <script>
-        // check both password
-        async function isMatch() {
-            var pass = document.getElementById("password").value;
-            var confPass = document.getElementById("confirmPassword").value;
-            var warning = document.getElementById("passwordMatch");
-            var form = document.getElementById("formRegister");
+        var email = document.getElementById("email");
 
-            if (pass != confPass) {
-                warning.innerHTML = "password is not match!";
-            } else {
-                var keySize = 2048;
-                var crypt = new JSEncrypt({ default_key_size: keySize });
-                var dt = new Date();
-                var time = -(dt.getTime());
-                crypt.getKey();
-                dt = new Date();
-                time += (dt.getTime());
-
-                // generate RSA Pair Key
-                var privKey = crypt.getPrivateKey();
-                var pubKey = crypt.getPublicKey();
-
-                // download both key using async await
-                await downloadProcess(pubKey, privKey)
-
-                // post data form to server
-                form.submit();
-            }
-        }
-
-        // function to sequence download public & private key, also send public key to hidden form value
-        function downloadProcess(pubKey, privKey) {
-            var email = document.getElementById("email").value
-            return new Promise((resolve, reject) => {
-                download(`${email}-public_key.pem`, pubKey);
-                download(`${email}-private_key.pem`, privKey);
-                document.getElementById("public_key").value = pubKey;
-                resolve()
-            })
-        }
-
-        // function to download file
-        function download(filename, text) {
-            var element = document.createElement('a');
-            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-            element.setAttribute('download', filename);
-
-            element.style.display = 'none';
-            document.body.appendChild(element);
-
-            element.click();
-
-            document.body.removeChild(element);
+        email.onfocus = function(){
+            document.getElementById("errorMessage").style.display = "none";
         }
     </script>
 </body>
