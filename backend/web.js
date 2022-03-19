@@ -47,8 +47,8 @@ passport.deserializeUser(User.deserializeUser())
 
 // register page
 app.get('/register', (req, res) => {
-  res.render('register', {
-    layout: 'register',
+  res.render('auth/register', {
+    layout: 'auth/register',
     title: 'register',
   })
 })
@@ -58,13 +58,13 @@ app.post('/register', async (req, res) => {
   const voter = await getSingleVoter(req.body.email)
 
   if (status) {
-    res.render('register', {
-      layout: 'register',
+    res.render('auth/register', {
+      layout: 'auth/register',
       error: `${req.body.email} has been registered!`,
     })
   } else {
-    res.render('register-2', {
-      layout: 'register-2',
+    res.render('auth/register-2', {
+      layout: 'auth/register-2',
       voter,
     })
   }
@@ -75,8 +75,8 @@ app.post('/register2', async (req, res) => {
   if (isSucced) {
     res.send('registration success')
   } else {
-    res.render('register', {
-      layout: 'register',
+    res.render('auth/register', {
+      layout: 'auth/register',
       error: `${req.body.email} has been registered!`,
     })
   }
@@ -84,8 +84,8 @@ app.post('/register2', async (req, res) => {
 
 // login page
 app.get('/login', (req, res) => {
-  res.render('login', {
-    layout: 'login',
+  res.render('auth/login', {
+    layout: 'auth/login',
     title: 'login',
   })
 })
@@ -104,7 +104,7 @@ app.post(
 // logout
 app.get('/logout', (req, res) => {
   req.logout()
-  res.redirect('/login')
+  res.redirect('/')
 })
 
 // root page
