@@ -108,8 +108,10 @@ const deletePhotoVoter = async (id) => {
   }
 }
 
-// check if pubkey has filled or not
-// also check if voterID is invalid
+// check if pubkey has filled or not, also check if voterID is invalid
+// return 1 : voter is not exist
+// return 2 : public key is filled
+// return 3 : public key is null
 const isPubkeyExist = async (id) => {
   const voter = await getSingleVoter(id)
   if (voter === null) {
@@ -144,6 +146,16 @@ const addPubKey = async (voter) => {
   } else {
     return false
   }
+}
+
+// get public key of voter only
+const getVoterPubkey = async (id) => {
+  const status = await isPubkeyExist(id)
+  if (status === 1) return 'invalid id!'
+  else if (status === 3) return 'public key has not set!'
+
+  const voter = await getSingleVoter(id)
+  return voter.public_key
 }
 
 //////////// end of voter ///////////////
@@ -223,6 +235,7 @@ module.exports = {
   editVoter,
   addPubKey,
   isPubkeyExist,
+  getVoterPubkey,
   candidateCount,
   getCandidate,
   addCandidate,

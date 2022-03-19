@@ -31,6 +31,7 @@ const {
   editVoter,
   addPubKey,
   isPubkeyExist,
+  getVoterPubkey,
   candidateCount,
   getCandidate,
   addCandidate,
@@ -220,10 +221,16 @@ app.delete('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   res.redirect('/voters')
 })
 
-// API export voters
-app.get('/backend/voters', async (req, res) => {
-  const voters = await getVoter()
-  res.json(voters)
+// export voters API
+// validate structure of ID (type : hex)
+app.get('/voters/:id', async (req, res) => {
+  const { error } = idValidation(new Object({'id': req.params.id}))
+  if (error) {
+    res.send('invalid id!')
+  } else {
+    const voterID = await getVoterPubkey(req.params.id)
+    res.send(voterID)
+  }
 })
 /////////////////////////////////////// end of voters ////////////////////////////////////////
 
