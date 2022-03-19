@@ -36,7 +36,11 @@ const {
   addCandidate,
   deleteCandidate,
 } = require('./db')
-const { voterValidation, candidateValidation } = require('./validation')
+const {
+  voterValidation,
+  candidateValidation,
+  idValidation,
+} = require('./validation')
 const voterPhoto = voterUpload.single('voterPhotoUpload')
 const candidatePhoto = candidateUpload.single('candidatePhotoUpload')
 const User = require('./model/user')
@@ -54,30 +58,45 @@ app.get('/register', (req, res) => {
 })
 
 app.post('/register', async (req, res) => {
-  const status = await isPubkeyExist(req.body.email)
-  const voter = await getSingleVoter(req.body.email)
-
-  if (status) {
+  const { error } = idValidation(req.body)
+  if (error) {
     res.render('auth/register', {
       layout: 'auth/register',
-      error: `${req.body.email} has been registered!`,
+      error: `invalid id!`,
     })
   } else {
-    res.render('auth/register-2', {
-      layout: 'auth/register-2',
-      voter,
-    })
+    const status = await isPubkeyExist(req.body.id)
+
+    if (status === 1) {
+      res.render('auth/register', {
+        layout: 'auth/register',
+        error: `invalid id!`,
+      })
+    } else if (status === 2) {
+      res.render('auth/register', {
+        layout: 'auth/register',
+        error: `${req.body.id} has been registered!`,
+      })
+    } else {
+      const voter = await getSingleVoter(req.body.id)
+      const selectedVoter = voter.id
+      res.render('auth/register-2', {
+        layout: 'auth/register-2',
+        selectedVoter,
+      })
+    }
   }
 })
 
 app.post('/register2', async (req, res) => {
   const isSucced = await addPubKey(req.body)
+
   if (isSucced) {
     res.send('registration success')
   } else {
     res.render('auth/register', {
       layout: 'auth/register',
-      error: `${req.body.email} has been registered!`,
+      error: `${req.body.id} has been registered!`,
     })
   }
 })
@@ -197,7 +216,7 @@ app.put('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 
 // delete voters
 app.delete('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
-  deleteVoter(req.body.email)
+  deleteVoter(req.body.id)
   res.redirect('/voters')
 })
 

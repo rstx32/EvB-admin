@@ -51,7 +51,7 @@
             z-index: 3;
         }
 
-        .form-signin input[type="email"] {
+        .form-signin input[type="id"] {
             margin-bottom: -1px;
             border-bottom-right-radius: 0;
             border-bottom-left-radius: 0;
@@ -82,9 +82,8 @@
             <h1 class="h3 mb-3 fw-normal">EvB Voter Registration</h1>
 
             <div class="form-floating">
-                <input name="email" id="email" type="email" class="form-control" placeholder="Email" value="
-                <%= voter.email %> " readonly>
-                <label for="floatingInput">Email</label>
+                <input name="id" id="id" type="id" class="form-control" placeholder="ID" value="<%= selectedVoter %>" readonly>
+                <label for="floatingInput">ID</label>
             </div>
             <div class="form-floating">
                 <input name="password" id="password" type="password" class="form-control" placeholder="Password"
@@ -186,7 +185,7 @@
         // save both key to client
         async function send() {
             var form = document.getElementById("formRegister");
-            var email = document.getElementById("email").value;
+            var id = document.getElementById("id").value;
             var keySize = 2048;
             var crypt = new JSEncrypt({ default_key_size: keySize });
             var dt = new Date();
@@ -203,17 +202,17 @@
             document.getElementById("public_key").value = pubKey;
 
             // download both key using async await
-            await downloadProcess(email, pubKey, privKey)
+            await downloadProcess(id, pubKey, privKey)
 
             // post data form to server
             form.submit();
         }
 
         // function to download public & private key
-        function downloadProcess(email, pubKey, privKey) {
+        function downloadProcess(id, pubKey, privKey) {
             return new Promise((resolve, reject) => {
-                download(`${email}-public_key.pem`, pubKey);
-                download(`${email}-private_key.pem`, privKey);
+                download(`${id}-public_key.pem`, pubKey);
+                download(`${id}-private_key.pem`, privKey);
                 resolve()
             })
         }

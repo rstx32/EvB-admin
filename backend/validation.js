@@ -43,4 +43,11 @@ const candidateValidation = (candidate) => {
   return schema.validate(candidate, { abortEarly: false })
 }
 
-module.exports = { voterValidation, candidateValidation }
+const idValidation = (voterID) => {
+  const schema = Joi.object({
+    id: Joi.string().hex().min(24).max(24),
+  })
+  return schema.validate(voterID)
+}
+
+module.exports = { voterValidation, candidateValidation, idValidation }

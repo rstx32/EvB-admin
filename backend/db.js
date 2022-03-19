@@ -19,8 +19,8 @@ const getVoter = async () => {
 }
 
 // get a voter
-const getSingleVoter = async (Email) => {
-  return await Voter.findOne({ email: Email })
+const getSingleVoter = async (id) => {
+  return await Voter.findById(id)
 }
 
 // add voter
@@ -47,26 +47,27 @@ const addVoter = async (newVoter, newPhoto) => {
 }
 
 // delete voter
-const deleteVoter = async (newEmail) => {
+const deleteVoter = async (id) => {
   // delete photo
-  deletePhotoVoter(newEmail)
+  deletePhotoVoter(id)
 
   await Voter.deleteOne({
-    email: newEmail,
+    _id: id,
   })
 }
 
 // edit voter
 const editVoter = async (newVoter, newPhoto) => {
-  const newEmail = newVoter.email
+  const id = newVoter.id
   const newFullname = newVoter.fullname
   const newPassword = await bcrypt.hash(newVoter.password, 8)
 
-  // if photo are none
+  // if photo are none, do nothing
+  // if photo are inserted, delete old photo and replace with the new one
   if (!newPhoto) {
     await Voter.updateOne(
       {
-        email: newEmail,
+        _id: id,
       },
       {
         $set: {
@@ -75,14 +76,11 @@ const editVoter = async (newVoter, newPhoto) => {
         },
       }
     )
-  }
-  // if photo are inserted
-  else {
-    // delete old photo
-    deletePhoto(newUsername)
+  } else {
+    deletePhotoVoter(id)
     await Voter.updateOne(
       {
-        email: newEmail,
+        _id: id,
       },
       {
         $set: {
@@ -96,8 +94,8 @@ const editVoter = async (newVoter, newPhoto) => {
 }
 
 // delete photo
-const deletePhotoVoter = async (email) => {
-  const oldPhoto = await getSingleVoter(email)
+const deletePhotoVoter = async (id) => {
+  const oldPhoto = await getSingleVoter(id)
   if (!oldPhoto) {
     return
   } else if (oldPhoto.photo !== 'dummy.jpg') {
@@ -111,28 +109,29 @@ const deletePhotoVoter = async (email) => {
 }
 
 // check if pubkey has filled or not
-const isPubkeyExist = async (email) => {
-  const voter = await getSingleVoter(email)
-  if (voter.public_key !== null) {
-    return true
+// also check if voterID is invalid
+const isPubkeyExist = async (id) => {
+  const voter = await getSingleVoter(id)
+  if (voter === null) {
+    return 1
+  } else if (voter.public_key !== null) {
+    return 2
   } else {
-    return false
+    return 3
   }
 }
 
 // add public_key
 const addPubKey = async (voter) => {
-  const voterEmail = voter.email
+  const voterID = voter.id
   const voterPassword = await bcrypt.hash(voter.password, 8)
   const pubKey = voter.public_key
 
-  const status = await isPubkeyExist(voter.email)
-  if (status) {
-    return false
-  } else {
+  const status = await isPubkeyExist(voter.id)
+  if (status === 3) {
     await Voter.updateOne(
       {
-        email: voterEmail,
+        _id: voterID,
       },
       {
         $set: {
@@ -142,6 +141,8 @@ const addPubKey = async (voter) => {
       }
     )
     return true
+  } else {
+    return false
   }
 }
 

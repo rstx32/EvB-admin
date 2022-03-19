@@ -165,8 +165,8 @@
                                                         <div class="modal-footer">
                                                             <!-- modal button delete voter -->
                                                             <form method="post" action="/voters?_method=DELETE">
-                                                                <input type="hidden" name="email"
-                                                                    value="<%= v.email %>">
+                                                                <input type="hidden" name="id"
+                                                                    value="<%= v._id %>">
                                                                 <button type="submit" class="btn btn-danger"
                                                                     data-bs-dismiss="modal"
                                                                     onclick="return confirm('are you sure?')">Delete</button>
