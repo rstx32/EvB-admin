@@ -1,7 +1,7 @@
 const Joi = require('joi')
 
+// validation for voter
 const voterValidation = (voter) => {
-  // schema untuk formulir terdiri dari 4 form string : username, fullname, email, password
   const schema = Joi.object({
     fullname: Joi.string()
       .pattern(new RegExp('^[a-zA-Z ]*$'))
@@ -21,8 +21,8 @@ const voterValidation = (voter) => {
   return schema.validate(voter, { abortEarly: false })
 }
 
+// validation for candidate
 const candidateValidation = (candidate) => {
-  // schema untuk formulir terdiri dari 2 form string : candidate dan vice candidate
   const schema = Joi.object({
     candidate: Joi.string()
       .pattern(new RegExp('^[a-zA-Z ]*$'))
@@ -43,6 +43,7 @@ const candidateValidation = (candidate) => {
   return schema.validate(candidate, { abortEarly: false })
 }
 
+// validation for voterID
 const idValidation = (voterID) => {
   const schema = Joi.object({
     id: Joi.string().hex().min(24).max(24),

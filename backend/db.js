@@ -158,6 +158,10 @@ const getVoterPubkey = async (id) => {
   return voter.public_key
 }
 
+const exportPubKey = async () => {
+  return await Voter.find().select('public_key')
+}
+
 //////////// end of voter ///////////////
 
 //////////// candidate ///////////////
@@ -236,6 +240,7 @@ module.exports = {
   addPubKey,
   isPubkeyExist,
   getVoterPubkey,
+  exportPubKey,
   candidateCount,
   getCandidate,
   addCandidate,
