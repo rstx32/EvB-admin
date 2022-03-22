@@ -1,6 +1,11 @@
 <h3>candidates</h3>
 
-<% if (typeof errors !='undefined' ) { %>
+<% if (errors.length > 0) { %>
+    <% if (errors[0] === 'invalid photo file!') { %>
+    <div class="alert alert-danger" role="alert">
+        <%= errors %> 
+    </div>
+    <% } else { %>
     <div class="alert alert-danger" role="alert">
         <ul>
             <% errors.forEach(e=> { %>
@@ -10,69 +15,70 @@
                 <% }); %>
         </ul>
     </div>
-    <% } %>
+    <% } %> 
+<% } %>
 
-        <!-- modal button add candidate -->
-        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addCandidate">
-            <i class="bi bi-person-plus"> Add Candidate</i>
-        </button>
+<!-- modal button add candidate -->
+<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addCandidate">
+    <i class="bi bi-person-plus"> Add Candidate</i>
+</button>
 
-        total candidates : <%= allCandidates %> 
+total candidates : <%= allCandidates %> 
 
-        <!-- modal box add candidate -->
-        <div class="modal fade" id="addCandidate" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-md">
-                <div class="modal-content">
-                    <!-- modal header -->
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Add Candidate</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- modal box add candidate -->
+<div class="modal fade" id="addCandidate" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+            <!-- modal header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Candidate</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- modal body -->
+            <div class="modal-body">
+                <!-- form -->
+                <form method="POST" action="/candidates" enctype="multipart/form-data">
+                    <!-- candidate -->
+                    <div class="input-group mb-3">
+                        <input type="text" name="candidate" class="form-control" placeholder="candidate name">
                     </div>
-                    <!-- modal body -->
-                    <div class="modal-body">
-                        <!-- form -->
-                        <form method="POST" action="/candidates" enctype="multipart/form-data">
-                            <!-- candidate -->
-                            <div class="input-group mb-3">
-                                <input type="text" name="candidate" class="form-control" placeholder="candidate name">
-                            </div>
-                            <!-- vice candidate -->
-                            <div class="input-group mb-3">
-                                <input type="text" name="viceCandidate" class="form-control"
-                                    placeholder="vice candidate name">
-                            </div>
-                            <!-- photo upload -->
-                            <div class="mb-3">
-                                <label for="formFileSm" class="form-label">Candidate Photo Upload</label>
-                                <input class="form-control form-control-sm" name="candidatePhotoUpload" type="file">
-                            </div>
-                            <!-- submit -->
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                        </form>
-                        <!-- end form -->
+                    <!-- vice candidate -->
+                    <div class="input-group mb-3">
+                        <input type="text" name="viceCandidate" class="form-control"
+                            placeholder="vice candidate name">
                     </div>
+                    <!-- photo upload -->
+                    <div class="mb-3">
+                        <label for="formFileSm" class="form-label">Candidate Photo Upload</label>
+                        <input class="form-control form-control-sm" name="candidatePhotoUpload" type="file">
+                    </div>
+                    <!-- submit -->
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+                <!-- end form -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row candidate-container">
+    <% candidate.forEach(c=> { %>
+        <div class="col-md-3 my-4">
+            <div class="card" style="width: 18rem;">
+                <img src="/photo/candidates/<%= c.photo %>" class="card-img-top">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <%= c.candidate %>
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted"><%= c.viceCandidate %></h6>
+                    <!-- modal button delete voter -->
+                    <form method="post" action="/candidates?_method=DELETE">
+                        <input type="hidden" name="id" value="<%= c._id %>">
+                        <button type="submit" class="btn btn-danger" data-bs-dismiss="modal"
+                            onclick="return confirm('are you sure?')">Delete</button>
+                    </form>
                 </div>
             </div>
         </div>
-
-        <div class="row candidate-container">
-            <% candidate.forEach(c=> { %>
-                <div class="col-md-3 my-4">
-                    <div class="card" style="width: 18rem;">
-                        <img src="/photo/candidates/<%= c.photo %>" class="card-img-top">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <%= c.candidate %>
-                            </h5>
-                            <h6 class="card-subtitle mb-2 text-muted"><%= c.viceCandidate %></h6>
-                            <!-- modal button delete voter -->
-                            <form method="post" action="/candidates?_method=DELETE">
-                                <input type="hidden" name="id" value="<%= c._id %>">
-                                <button type="submit" class="btn btn-danger" data-bs-dismiss="modal"
-                                    onclick="return confirm('are you sure?')">Delete</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <% }); %>
-        </div>
+        <% }); %>
+</div>

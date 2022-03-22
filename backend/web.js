@@ -5,6 +5,7 @@ const methodOverride = require('method-override')
 const passport = require('passport')
 const session = require('express-session')
 const connectEnsureLogin = require('connect-ensure-login')
+const flash = require('connect-flash')
 const app = express()
   .set('view engine', 'ejs')
   .use(express.urlencoded({ extended: false }))
@@ -20,6 +21,7 @@ const app = express()
   )
   .use(passport.initialize())
   .use(passport.session())
+  .use(flash())
 
 const { voterUpload, candidateUpload } = require('./multer')
 const {
@@ -33,6 +35,7 @@ const {
   isPubkeyExist,
   getVoterPubkey,
   exportPubKey,
+  getvoterpasswd,
   candidateCount,
   getCandidate,
   addCandidate,
@@ -53,32 +56,28 @@ passport.deserializeUser(User.deserializeUser())
 
 // register page
 app.get('/register', (req, res) => {
+  const flashMessage = req.flash('message')
   res.render('auth/register', {
     layout: 'auth/register',
     title: 'register',
+    error: flashMessage,
   })
 })
 
 app.post('/register', async (req, res) => {
   const { error } = idValidation(req.body)
   if (error) {
-    res.render('auth/register', {
-      layout: 'auth/register',
-      error: `invalid id!`,
-    })
+    req.flash('message', 'invalid ID!')
+    res.redirect('register')
   } else {
     const status = await isPubkeyExist(req.body.id)
 
     if (status === 1) {
-      res.render('auth/register', {
-        layout: 'auth/register',
-        error: `invalid id!`,
-      })
+      req.flash('message', 'invalid ID!')
+      res.redirect('register')
     } else if (status === 2) {
-      res.render('auth/register', {
-        layout: 'auth/register',
-        error: `${req.body.id} has been registered!`,
-      })
+      req.flash('message', `${req.body.id} has been registered!`)
+      res.redirect('register')
     } else {
       const voter = await getSingleVoter(req.body.id)
       const selectedVoter = voter.id
@@ -94,20 +93,21 @@ app.post('/register2', async (req, res) => {
   const isSucced = await addPubKey(req.body)
 
   if (isSucced) {
-    res.send('registration success')
+    req.flash('message', `registration ID : ${req.body.id} complete!`)
+    res.redirect('register')
   } else {
-    res.render('auth/register', {
-      layout: 'auth/register',
-      error: `${req.body.id} has been registered!`,
-    })
+    req.flash('message', `${req.body.id} has been registered!`)
+    res.redirect('register')
   }
 })
 
 // login page
 app.get('/login', (req, res) => {
+  const flashMessage = req.flash('error')
   res.render('auth/login', {
     layout: 'auth/login',
     title: 'login',
+    errors: flashMessage,
   })
 })
 
@@ -115,10 +115,10 @@ app.post(
   '/login',
   passport.authenticate('local', {
     failureRedirect: '/login',
-    successRedirect: '/',
+    failureFlash: true,
   }),
   (req, res) => {
-    console.log(req.user)
+    res.redirect('/')
   }
 )
 
@@ -141,77 +141,51 @@ app.get('/', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
 app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const allVoters = await voterCount()
   const voters = await getVoter()
+  const flashMessage = req.flash('message')
 
   res.render('voters', {
     layout: 'layouts/main-layout',
     title: 'voters',
     voters,
     allVoters,
+    errors: flashMessage,
   })
 })
 
 // add voters
-app.post('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  const allVoters = await voterCount()
-  const voters = await getVoter()
-
-  // multer upload file foto
+app.post('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   voterPhoto(req, res, (err) => {
     if (err) {
-      return res.status(400).render('voters', {
-        layout: 'layouts/main-layout',
-        title: 'voters',
-        errors: 'invalid photo file!',
-        voters,
-        allVoters,
-      })
-    }
-
-    const { error, value } = voterValidation(req.body)
-    if (error) {
-      return res.status(400).render('voters', {
-        layout: 'layouts/main-layout',
-        title: 'voters',
-        errors: error.details,
-        voters,
-        allVoters,
-      })
-    } else {
-      addVoter(value, req.file)
+      req.flash('message', 'invalid photo file!')
       res.redirect('/voters')
+    } else {
+      const { error, value } = voterValidation(req.body)
+      if (error) {
+        req.flash('message', error.details)
+        res.redirect('/voters')
+      } else {
+        addVoter(value, req.file)
+        res.redirect('/voters')
+      }
     }
   })
 })
 
 // edit voters
 app.put('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  const voters = await getVoter()
-  const allVoters = await voterCount()
-
-  // multer upload file foto
   voterPhoto(req, res, (err) => {
     if (err) {
-      return res.status(400).render('voters', {
-        layout: 'layouts/main-layout',
-        title: 'voters',
-        errors: 'invalid file!',
-        voters,
-        allVoters,
-      })
-    }
-
-    const { error, value } = voterValidation(req.body)
-    if (error) {
-      res.status(400).render('voters', {
-        layout: 'layouts/main-layout',
-        title: 'voters',
-        errors: error.details,
-        voters,
-        allVoters,
-      })
-    } else {
-      editVoter(value, req.file)
+      req.flash('message', 'invalid photo file!')
       res.redirect('/voters')
+    } else {
+      const { error, value } = voterValidation(req.body)
+      if (error) {
+        req.flash('message', error.details)
+        res.redirect('/voters')
+      } else {
+        editVoter(value, req.file)
+        res.redirect('/voters')
+      }
     }
   })
 })
@@ -219,13 +193,14 @@ app.put('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 // delete voters
 app.delete('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   deleteVoter(req.body.id)
+  req.flash('message', `${req.body.id} deleted`)
   res.redirect('/voters')
 })
 
 // export a voter
 // validate structure of ID (type : hex)
 app.get('/voters/:id', async (req, res) => {
-  const { error } = idValidation(new Object({'id': req.params.id}))
+  const { error } = idValidation(new Object({ id: req.params.id }))
   if (error) {
     res.send('invalid id!')
   } else {
@@ -240,6 +215,12 @@ app.get('/getvoters', async (req, res) => {
   res.send(voters)
 })
 
+// export a voter
+app.get('/voter/:id', async (req, res) => {
+  const voter = await getvoterpasswd(req.params.id)
+  res.send(voter)
+})
+
 /////////////////////////////////////// end of voters ////////////////////////////////////////
 
 //////////////////////////////////////// /// candidates ///////////////////////////////////////////
@@ -250,12 +231,14 @@ app.get(
   async (req, res) => {
     const allCandidates = await candidateCount()
     const candidate = await getCandidate()
+    const flashMessage = req.flash('message')
 
     res.render('candidates', {
       layout: 'layouts/main-layout',
       title: 'candidates',
       candidate,
       allCandidates,
+      errors: flashMessage,
     })
   }
 )
@@ -265,30 +248,20 @@ app.post(
   '/candidates',
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
-    const candidate = await getCandidate()
-
     // multer upload file foto
     candidatePhoto(req, res, (err) => {
       if (err) {
-        return res.status(400).render('candidates', {
-          layout: 'layouts/main-layout',
-          title: 'candidates',
-          errors: 'invalid photo file!',
-          candidate,
-        })
-      }
-
-      const { error, value } = candidateValidation(req.body)
-      if (error) {
-        return res.status(400).render('candidates', {
-          layout: 'layouts/main-layout',
-          title: 'candidates',
-          errors: error.details,
-          candidate,
-        })
-      } else {
-        addCandidate(value, req.file)
+        req.flash('message', 'invalid photo file!')
         res.redirect('/candidates')
+      } else {
+        const { error, value } = candidateValidation(req.body)
+        if (error) {
+          req.flash('message', error.details)
+          res.redirect('/voters')
+        } else {
+          addCandidate(value, req.file)
+          res.redirect('/candidates')
+        }
       }
     })
   }
@@ -301,7 +274,7 @@ app.delete('/candidates', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
 })
 
 // API export voters
-app.get('/backend/candidates', async (req, res) => {
+app.get('/getcandidates', async (req, res) => {
   const voters = await getCandidate()
   res.json(voters)
 })
