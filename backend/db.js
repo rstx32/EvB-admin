@@ -58,16 +58,16 @@ const deleteVoter = async (id) => {
 
 // edit voter
 const editVoter = async (newVoter, newPhoto) => {
-  const id = newVoter.id
+  const currentEmail = newVoter.email
   const newFullname = newVoter.fullname
-  const newPassword = await bcrypt.hash(newVoter.password, 8)
+  const newPassword = bcrypt.hashSync(newVoter.password, 8)
 
   // if photo are none, do nothing
   // if photo are inserted, delete old photo and replace with the new one
   if (!newPhoto) {
     await Voter.updateOne(
       {
-        _id: id,
+        email: currentEmail,
       },
       {
         $set: {
@@ -80,7 +80,7 @@ const editVoter = async (newVoter, newPhoto) => {
     deletePhotoVoter(id)
     await Voter.updateOne(
       {
-        _id: id,
+        email: currentEmail,
       },
       {
         $set: {
@@ -158,8 +158,14 @@ const getVoterPubkey = async (id) => {
   return voter.public_key
 }
 
+// export all public key voter
 const exportPubKey = async () => {
   return await Voter.find().select('public_key')
+}
+
+// export a voter
+const getvoterpasswd = async (id) => {
+  return await Voter.findById(id).select('password')
 }
 
 //////////// end of voter ///////////////
@@ -241,6 +247,7 @@ module.exports = {
   isPubkeyExist,
   getVoterPubkey,
   exportPubKey,
+  getvoterpasswd,
   candidateCount,
   getCandidate,
   addCandidate,
