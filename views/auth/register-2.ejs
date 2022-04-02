@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/x-icon" href="/EvB.png">
     <title>EvB Registration</title>
-    <script type="text/javascript" src="jsencrypt.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
@@ -82,7 +81,8 @@
             <h1 class="h3 mb-3 fw-normal">EvB Voter Registration</h1>
 
             <div class="form-floating">
-                <input name="id" id="id" type="id" class="form-control" placeholder="ID" value="<%= selectedVoter %>" readonly>
+                <input name="id" id="id" type="id" class="form-control" placeholder="ID" value="<%= selectedVoter %>"
+                    readonly>
                 <label for="floatingInput">ID</label>
             </div>
             <div class="form-floating">
@@ -105,43 +105,48 @@
                 <div class="alert alert-danger" role="alert">
                     <%= error %>
                 </div>
-            <% } %>
+                <% } %>
 
-            <!-- Button trigger modal -->
-            <div id="register">
-                <button type="button" class="w-100 btn btn-lg btn-primary" data-bs-toggle="modal"
-                data-bs-target="#staticBackdrop" disabled>
-                    Register
-                </button>
-            </div>
+                    <!-- Button trigger modal -->
+                    <div id="register">
+                        <button type="button" class="w-100 btn btn-lg btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#staticBackdrop" disabled>
+                            Register
+                        </button>
+                    </div>
 
-            <!-- Modal -->
-            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
-                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="staticBackdropLabel">README!</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>
-                                keep your private key secret! do not share with anyone, do not lose your key,
-                                this key will be your access to vote!
-                            </p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-success" onclick="send()">Register</button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+                        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="staticBackdropLabel">README!</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>
+                                        keep your private key secret! do not share with anyone, do not lose your key,
+                                        this key will be your access to vote!
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-success" onclick="send()">Register</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <p class="mt-5 mb-3 text-muted">&copy; rstx</p>
+                    <p class="mt-5 mb-3 text-muted">&copy; rstx</p>
         </form>
     </main>
 
     <script>
+        var form = document.getElementById("formRegister");
+        var id = document.getElementById("id").value;
+        var pubKey = document.getElementById("public_key")
+
         // check password and confirmation password
         function checkMatch() {
             var pass = document.getElementById("password").value;
@@ -180,39 +185,56 @@
             }
         }
 
-        // generate rsa pair key
-        // submit form
-        // save both key to client
-        async function send() {
-            var form = document.getElementById("formRegister");
-            var id = document.getElementById("id").value;
-            var keySize = 2048;
-            var crypt = new JSEncrypt({ default_key_size: keySize });
-            var dt = new Date();
-            var time = -(dt.getTime());
+        function ab2str(buf) {
+            return String.fromCharCode.apply(null, new Uint8Array(buf))
+        }
 
-            crypt.getKey();
-            dt = new Date();
-            time += (dt.getTime());
+        async function exportCryptoPrivKey(key) {
+            const exported = await window.crypto.subtle.exportKey('pkcs8', key)
+            const exportedAsString = ab2str(exported)
+            const exportedAsBase64 = window.btoa(exportedAsString)
+            const pemExported = `-----BEGIN PRIVATE KEY-----\n${exportedAsBase64}\n-----END PRIVATE KEY-----`
 
-            // generate RSA Pair Key
-            var privKey = crypt.getPrivateKey();
-            var pubKey = crypt.getPublicKey();
+            await downloadProcess(id , pemExported, 'private_key')
+        }
 
-            document.getElementById("public_key").value = pubKey;
+        async function exportCryptoPubKey(key) {
+            const exported = await window.crypto.subtle.exportKey('spki', key)
+            const exportedAsString = ab2str(exported)
+            const exportedAsBase64 = window.btoa(exportedAsString)
+            const pemExported = `-----BEGIN PUBLIC KEY-----\n${exportedAsBase64}\n-----END PUBLIC KEY-----`
 
-            // download both key using async await
-            await downloadProcess(id, pubKey, privKey)
-
+            pubKey.value = pemExported;
+            await downloadProcess(id, pemExported, 'public_key')
             // post data form to server
             form.submit();
         }
 
+        // generate rsa pair key
+        // submit form
+        // save both key to client
+        async function send() {
+            window.crypto.subtle
+                .generateKey(
+                    {
+                        name: 'RSASSA-PKCS1-v1_5',
+                        modulusLength: 2048,
+                        publicExponent: new Uint8Array([1, 0, 1]),
+                        hash: 'SHA-256',
+                    },
+                    true,
+                    ['sign', 'verify']
+                )
+                .then((keyPair) => {
+                    exportCryptoPrivKey(keyPair.privateKey)
+                    exportCryptoPubKey(keyPair.publicKey)
+                })
+        }
+
         // function to download public & private key
-        function downloadProcess(id, pubKey, privKey) {
+        function downloadProcess(id, key, type) {
             return new Promise((resolve, reject) => {
-                download(`${id}-public_key.pem`, pubKey);
-                download(`${id}-private_key.pem`, privKey);
+                download(`${id}-${type}.pem`, key);
                 resolve()
             })
         }
@@ -232,4 +254,5 @@
         }
     </script>
 </body>
+
 </html>

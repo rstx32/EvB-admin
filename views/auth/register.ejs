@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/x-icon" href="/EvB.png">
     <title>EvB Register</title>
-    <script type="text/javascript" src="jsencrypt.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <style>
@@ -60,7 +59,7 @@
             border-top-right-radius: 0;
         }
 
-        .btn {
+        .btn-lg {
             margin-top: 10px;
             border-top-left-radius: 0;
             border-top-right-radius: 0;
@@ -80,9 +79,10 @@
                 </div>
             <% } %>
                 
-            <div class="form-floating">
+            <div class="input-group mb-3 form-floating">
                 <input name="id" id="id" type="id" class="form-control" placeholder="ID Voter">
                 <label for="floatingInput">ID Voter</label>
+                <button class="btn btn-success" type="button" id="paste">Paste</button>
             </div>
 
             <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
@@ -91,6 +91,13 @@
     </main>
 
     <script>
+        var paste = document.getElementById("paste")
+        paste.addEventListener('click', async (event) => {
+            id.value = '';
+            const data = await navigator.clipboard.readText()
+            id.value = data
+        })
+
         var id = document.getElementById("id");
 
         id.onkeypress = function(){
