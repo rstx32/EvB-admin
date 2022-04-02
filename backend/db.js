@@ -154,13 +154,7 @@ const getVoterPubkey = async (id) => {
   if (status === 1) return 'invalid id!'
   else if (status === 3) return 'public key has not set!'
 
-  const voter = await getSingleVoter(id)
-  return voter.public_key
-}
-
-// export all public key voter
-const exportPubKey = async () => {
-  return await Voter.find().select('public_key')
+  return await Voter.findById(id).select('public_key')
 }
 
 // export a voter
@@ -246,7 +240,6 @@ module.exports = {
   addPubKey,
   isPubkeyExist,
   getVoterPubkey,
-  exportPubKey,
   getvoterpasswd,
   candidateCount,
   getCandidate,
