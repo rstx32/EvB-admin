@@ -4,7 +4,7 @@
   "description": "user authentication & candidate management",
   "main": "web.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./backend/web.js",
     "nodemon": "nodemon ./backend/web.js"
   },
   "keywords": [
