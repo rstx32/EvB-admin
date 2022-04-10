@@ -114,7 +114,15 @@ app.post(
   '/login',
   passport.authenticate('local', {
     failureRedirect: '/login',
-    failureFlash: true,
+    failureFlash: {
+      type: 'messageFailure',
+      message: 'wrong id or password!',
+    },
+    successRedirect: '/',
+    successFlash: {
+      type: 'messageSuccess',
+      message: 'Welcome to EvB dashboard!',
+    },
   }),
   (req, res) => {
     res.redirect('/')
@@ -129,24 +137,30 @@ app.get('/logout', (req, res) => {
 
 // root page
 app.get('/', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
-  res.render('index', {
+  const successMessage = req.flash('successFlash')
+  const user = req.user.username
+
+  res.render('homepage', {
     layout: 'layouts/main-layout',
     title: 'homepage',
+    user,
+    successMessage,
   })
 })
 
 /////////////////////////////////////////// voters ///////////////////////////////////////////
 // get all voters
 app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  const allVoters = await voterCount()
   const voters = await getVoter()
+  // res.send(voters)
   const flashMessage = req.flash('message')
+  const user = req.user.username
 
   res.render('voters', {
     layout: 'layouts/main-layout',
     title: 'voters',
+    user,
     voters,
-    allVoters,
     errors: flashMessage,
   })
 })
@@ -199,6 +213,7 @@ app.delete('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
 // export voter pubkey
 app.get('/voter/pubkey/:id', async (req, res) => {
   const { error } = idValidation(new Object({ id: req.params.id }))
+  
   if (error) {
     res.send('invalid id!')
   } else {
@@ -229,10 +244,12 @@ app.get(
     const allCandidates = await candidateCount()
     const candidate = await getCandidate()
     const flashMessage = req.flash('message')
+    const user = req.user.username
 
     res.render('candidates', {
       layout: 'layouts/main-layout',
       title: 'candidates',
+      user,
       candidate,
       allCandidates,
       errors: flashMessage,
