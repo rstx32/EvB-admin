@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
+const mongoosePaginate = require('mongoose-paginate-v2')
 
 // schema voter
-const voterSchema = mongoose.Schema({
+const voterSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -20,6 +21,8 @@ const voterSchema = mongoose.Schema({
   },
   photo: String,
 })
+
+voterSchema.plugin(mongoosePaginate)
 
 // model voter dengan menggunakan schema diatas
 const Voter = mongoose.model('Voter', voterSchema)
