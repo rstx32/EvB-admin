@@ -8,14 +8,14 @@ mongoose.connect(`${process.env.MONGODB_URL}`)
 
 //////////// voter ///////////////
 
-// count all documents
-const voterCount = async () => {
-  return await Voter.countDocuments()
-}
-
 // get all voter
 const getVoter = async () => {
-  return await Voter.find()
+  // return await Voter.find()
+  const options = {
+    page: 1,
+    limit: 3,
+  }
+  return await Voter.paginate({}, options)
 }
 
 // get a voter
@@ -231,7 +231,6 @@ const deletePhotoCandidate = async (id) => {
 //////////// end of candidate ///////////////
 
 module.exports = {
-  voterCount,
   getVoter,
   getSingleVoter,
   addVoter,

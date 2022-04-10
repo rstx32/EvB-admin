@@ -25,7 +25,6 @@ const app = express()
 
 const { voterUpload, candidateUpload } = require('./multer')
 const {
-  voterCount,
   getVoter,
   addVoter,
   getSingleVoter,
