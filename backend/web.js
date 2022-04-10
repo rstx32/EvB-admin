@@ -149,16 +149,20 @@ app.get('/', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
 
 /////////////////////////////////////////// voters ///////////////////////////////////////////
 // get all voters
-app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  const voters = await getVoter()
-  // res.send(voters)
+app.get('/voters', async (req, res) => {
+  // if query is empty, then add default query
+  if(Object.keys(req.query).length === 0){
+    req.query = {
+      limit: 5,
+      page:1,
+    }
+  }
+  const voters = await getVoter(req.query)
   const flashMessage = req.flash('message')
-  const user = req.user.username
 
   res.render('voters', {
     layout: 'layouts/main-layout',
     title: 'voters',
-    user,
     voters,
     errors: flashMessage,
   })
