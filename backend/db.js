@@ -10,7 +10,6 @@ mongoose.connect(`${process.env.MONGODB_URL}`)
 
 // get all voter
 const getVoter = async (query) => {
-  // return await Voter.find()
   const options = {
     page: query.page,
     limit: query.limit,

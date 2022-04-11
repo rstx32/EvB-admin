@@ -1,6 +1,4 @@
 node_modules
-public/photo
 .vscode
-public/assets
 .dockerignore
 Dockerfile

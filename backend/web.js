@@ -149,22 +149,25 @@ app.get('/', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
 
 /////////////////////////////////////////// voters ///////////////////////////////////////////
 // get all voters
-app.get('/voters', async (req, res) => {
+app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   // if query is empty, then add default query
-  if(Object.keys(req.query).length === 0){
+  if (Object.keys(req.query).length === 0) {
     req.query = {
       limit: 5,
-      page:1,
+      page: 1,
     }
   }
   const voters = await getVoter(req.query)
-  const flashMessage = req.flash('message')
+  const errorMessage = req.flash('errorMessage')
+  const successMessage = req.flash('successMessage')
+  const user = req.user.username
 
   res.render('voters', {
     layout: 'layouts/main-layout',
     title: 'voters',
     voters,
-    errors: flashMessage,
+    user,
+    flashMessage: { errorMessage, successMessage },
   })
 })
 
@@ -172,14 +175,15 @@ app.get('/voters', async (req, res) => {
 app.post('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   voterPhoto(req, res, (err) => {
     if (err) {
-      req.flash('message', 'invalid photo file!')
+      req.flash('errorMessage', 'invalid photo file!')
       res.redirect('/voters')
     } else {
       const { error, value } = voterValidation(req.body)
       if (error) {
-        req.flash('message', error.details)
+        req.flash('errorMessage', error.details)
         res.redirect('/voters')
       } else {
+        req.flash('successMessage', `success add new voter : ${value.email}`)
         addVoter(value, req.file)
         res.redirect('/voters')
       }
@@ -199,6 +203,7 @@ app.put('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
         req.flash('message', error.details)
         res.redirect('/voters')
       } else {
+        req.flash('successMessage', `success edit voter : ${value.email}`)
         editVoter(value, req.file)
         res.redirect('/voters')
       }
@@ -209,14 +214,14 @@ app.put('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 // delete voters
 app.delete('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   deleteVoter(req.body.id)
-  req.flash('message', `${req.body.id} deleted`)
+  req.flash('successMessage', `${req.body.email} deleted`)
   res.redirect('/voters')
 })
 
 // export voter pubkey
 app.get('/voter/pubkey/:id', async (req, res) => {
   const { error } = idValidation(new Object({ id: req.params.id }))
-  
+
   if (error) {
     res.send('invalid id!')
   } else {
