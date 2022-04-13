@@ -93,48 +93,54 @@
             </div>
             <input type="hidden" name="public_key" id="public_key">
 
+            <!-- alert danger for password not match -->
             <div class="alert alert-danger" role="alert" id="passwordMatch">
                 password is not match!
+            </div>
+            
+            <!-- alert danger for password length -->
+            <div class="alert alert-danger" role="alert" id="passwordLength">
+                password must be at least 5 characters!
             </div>
 
             <% if (typeof error !='undefined' ) { %>
                 <div class="alert alert-danger" role="alert">
                     <%= error %>
                 </div>
-                <% } %>
+            <% } %>
 
-                    <!-- Button trigger modal -->
-                    <div id="register">
-                        <button type="button" class="w-100 btn btn-lg btn-primary" data-bs-toggle="modal"
-                            data-bs-target="#staticBackdrop" disabled>
-                            Register
-                        </button>
-                    </div>
+            <!-- Button trigger modal -->
+            <!-- <div id="register"> -->
+                <button id="register" type="button" class="w-100 btn btn-lg btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#staticBackdrop" disabled>
+                    Register
+                </button>
+            <!-- </div> -->
 
-                    <!-- Modal -->
-                    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
-                        tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="staticBackdropLabel">README!</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p>
-                                        keep your private key secret! do not share with anyone, do not lose your key,
-                                        this key will be your access to vote!
-                                    </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-success" onclick="send()">Register</button>
-                                </div>
-                            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="staticBackdropLabel">README!</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                                keep your private key secret! do not share with anyone, do not lose your key,
+                                this key will be your access to vote!
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" onclick="send()">Register</button>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <p class="mt-5 mb-3 text-muted">&copy; rstx</p>
+            <p class="mt-5 mb-3 text-muted">&copy; rstx</p>
         </form>
     </main>
 
@@ -143,11 +149,16 @@
         var id = document.getElementById("id").value
         var pubKey = document.getElementById("public_key")
 
+        if(document.getElementById("password").value==""){
+            document.getElementById("passwordLength").style.display = "none";
+        }
+
         // check password and confirmation password
         function checkMatch() {
             var pass = document.getElementById("password").value;
             var confPass = document.getElementById("confirmPassword").value;
             var warning = document.getElementById("passwordMatch");
+            var warning2 = document.getElementById("passwordLength")
             var register = document.getElementById("register")
 
             // if confirmation password is empty, registration button is disabled
@@ -155,29 +166,22 @@
             // if password & confirmation password is match, registration button is enabled
             if (pass.length > 0 && confPass == "") {
                 warning.style.display = "none";
-                register.innerHTML = `
-                <button type="button" class="w-100 btn btn-lg btn-primary" data-bs-toggle="modal"
-                data-bs-target="#staticBackdrop" disabled>
-                    Register
-                </button>
-                `;
+                register.disabled = true;
             } else if (confPass !== pass) {
                 warning.style.display = "block";
-                warning.innerHTML = "password is not match!";
-                register.innerHTML = `
-                <button type="button" class="w-100 btn btn-lg btn-primary" data-bs-toggle="modal"
-                data-bs-target="#staticBackdrop" disabled>
-                    Register
-                </button>
-                `;
+                register.disabled = true;
             } else {
                 warning.style.display = "none";
-                register.innerHTML = `
-                <button type="button" class="w-100 btn btn-lg btn-primary" data-bs-toggle="modal"
-                data-bs-target="#staticBackdrop">
-                    Register
-                </button>
-                `;
+                warning2.style.display = "none";
+                register.disabled = false;
+            }
+
+            // check password length
+            if(pass.length!==0 && pass.length<5){
+                warning2.style.display = "block";
+                register.disabled = true;
+            }else{
+                warning2.style.display = "none";
             }
         }
 
