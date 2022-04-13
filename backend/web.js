@@ -136,15 +136,7 @@ app.get('/logout', (req, res) => {
 
 // root page
 app.get('/', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
-  const successMessage = req.flash('successFlash')
-  const user = req.user.username
-
-  res.render('homepage', {
-    layout: 'layouts/main-layout',
-    title: 'homepage',
-    user,
-    successMessage,
-  })
+  res.redirect('/voters')
 })
 
 /////////////////////////////////////////// voters ///////////////////////////////////////////
