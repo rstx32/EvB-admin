@@ -2,3 +2,5 @@ node_modules
 .vscode
 .dockerignore
 Dockerfile
+public/photo/candidates
+public/photo/voters
