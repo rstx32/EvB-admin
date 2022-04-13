@@ -1,8 +1,8 @@
 {
   "name": "evb-admin",
   "version": "1.0.0",
-  "description": "user authentication & candidate management",
-  "main": "web.js",
+  "description": "EvB user authentication & candidate management",
+  "main": "./backend/web.js",
   "scripts": {
     "start": "node ./backend/web.js",
     "nodemon": "nodemon ./backend/web.js"
