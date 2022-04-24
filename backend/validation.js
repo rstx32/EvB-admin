@@ -7,13 +7,11 @@ const voterValidation = (voter) => {
       .pattern(new RegExp('^[a-zA-Z ]*$'))
       .required()
       .messages({
-        'string.pattern.base': `fullname hanya diperbolehkan alfabet dan spasi`,
-        'string.empty': `fullname tidak boleh kosong`,
+        'string.pattern.base': `fullname allowed alphabet and space only!`
       }),
     email: Joi.string().email().required(),
     password: Joi.string().min(5).messages({
-      'string.empty': `password tidak boleh kosong`,
-      'string.min': `password minimal {#limit} karakter`,
+      'string.min': `password min.{#limit} character!`,
     }),
     public_key: Joi.string(),
   })
@@ -28,16 +26,14 @@ const candidateValidation = (candidate) => {
       .pattern(new RegExp('^[a-zA-Z ]*$'))
       .required()
       .messages({
-        'string.pattern.base': `nama kandidat hanya diperbolehkan alfabet dan spasi`,
-        'string.empty': `nama kandidat tidak boleh kosong`,
+        'string.pattern.base': `candidate name allowed alphabet and space only!`,
       }),
     viceCandidate: Joi.string()
       .pattern(new RegExp('^[a-zA-Z ]*$'))
-      .required()
       .messages({
-        'string.pattern.base': `nama wakil kandidat hanya diperbolehkan alfabet dan spasi`,
-        'string.empty': `nama wakil kandidat tidak boleh kosong`,
-      }),
+        'string.pattern.base': `vice candidate name allowed alphabet and space only!`,
+      })
+      .empty(''),
   })
   // abortearly : biar semua error tampil dalam array
   return schema.validate(candidate, { abortEarly: false })
