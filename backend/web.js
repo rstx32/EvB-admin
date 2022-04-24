@@ -101,11 +101,13 @@ app.post('/register2', async (req, res) => {
 
 // login page
 app.get('/login', (req, res) => {
-  const flashMessage = req.flash('error')
+  const errorMessage = req.flash('messageFailure')
+  const successMessage = req.flash('messageSuccess')
+
   res.render('auth/login', {
     layout: 'auth/login',
     title: 'login',
-    errors: flashMessage,
+    flashMessage: {errorMessage,successMessage},
   })
 })
 
@@ -115,17 +117,11 @@ app.post(
     failureRedirect: '/login',
     failureFlash: {
       type: 'messageFailure',
-      message: 'wrong id or password!',
+      message: 'wrong username or password!',
     },
     successRedirect: '/',
-    successFlash: {
-      type: 'messageSuccess',
-      message: 'Welcome to EvB dashboard!',
-    },
   }),
-  (req, res) => {
-    res.redirect('/')
-  }
+  (req, res) => {}
 )
 
 // logout
@@ -192,7 +188,7 @@ app.put('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     } else {
       const { error, value } = voterValidation(req.body)
       if (error) {
-        req.flash('message', error.details)
+        req.flash('errorMessage', error.details)
         res.redirect('/voters')
       } else {
         req.flash('successMessage', `success edit voter : ${value.email}`)
@@ -206,7 +202,7 @@ app.put('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 // delete voters
 app.delete('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   deleteVoter(req.body.id)
-  req.flash('successMessage', `${req.body.email} deleted`)
+  req.flash('successMessage', `${req.body.id} deleted`)
   res.redirect('/voters')
 })
 
@@ -243,8 +239,9 @@ app.get(
   async (req, res) => {
     const allCandidates = await candidateCount()
     const candidate = await getCandidate()
-    const flashMessage = req.flash('message')
     const user = req.user.username
+    const errorMessage = req.flash('errorMessage')
+    const successMessage = req.flash('successMessage')
 
     res.render('candidates', {
       layout: 'layouts/main-layout',
@@ -252,7 +249,7 @@ app.get(
       user,
       candidate,
       allCandidates,
-      errors: flashMessage,
+      flashMessage: { errorMessage, successMessage },
     })
   }
 )
@@ -270,9 +267,10 @@ app.post(
       } else {
         const { error, value } = candidateValidation(req.body)
         if (error) {
-          req.flash('message', error.details)
-          res.redirect('/voters')
+          req.flash('errorMessage', error.details)
+          res.redirect('/candidates')
         } else {
+          req.flash('successMessage', `success add new candidate : ${value.candidate}`)
           addCandidate(value, req.file)
           res.redirect('/candidates')
         }
@@ -281,7 +279,7 @@ app.post(
   }
 )
 
-// delete voters
+// delete candidates
 app.delete('/candidates', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   deleteCandidate(req.body.id)
   res.redirect('/candidates')
