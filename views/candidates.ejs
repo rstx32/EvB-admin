@@ -2,23 +2,43 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
 
-<% if (errors.length > 0) { %>
-    <% if (errors[0] === 'invalid photo file!') { %>
-    <div class="alert alert-danger" role="alert">
-        <%= errors %> 
+<!-- error flash -->
+<% if (flashMessage.errorMessage.length > 0) { %>
+    <% if (flashMessage.errorMessage[0] === 'invalid photo file!') { %>
+    <div class="card mb-4 py-3 border-left-danger">
+        <div class="card-body">
+            <code>
+                <%= flashMessage.errorMessage %> 
+            </code>
+        </div>
     </div>
     <% } else { %>
-    <div class="alert alert-danger" role="alert">
-        <ul>
-            <% errors.forEach(e=> { %>
-                <li>
-                    <%= e.message %>
-                </li>
+    <div class="card mb-4 py-3 border-left-danger">
+        <div class="card-body">
+            <ul>
+                <% flashMessage.errorMessage.forEach(e=> { %>
+                    <li>
+                        <code>
+                            <%= e.message %>
+                        </code>
+                    </li>
                 <% }); %>
-        </ul>
+            </ul>
+        </div>
     </div>
     <% } %> 
 <% } %>
+<!-- end error flash -->
+
+<!-- success flash -->
+<% if (flashMessage.successMessage.length > 0) { %>
+    <div class="card mb-4 py-3 border-left-success">
+        <div class="card-body">
+            <%= flashMessage.successMessage %>
+        </div>
+    </div>
+<% } %>
+<!-- end success flash -->
 
 <div class="row">
     <!-- card voter count -->
