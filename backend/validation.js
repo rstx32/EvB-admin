@@ -3,9 +3,16 @@ const Joi = require('joi')
 // validation for voter
 const voterValidation = (voter) => {
   const schema = Joi.object({
+    nim: Joi.string()
+      .pattern(new RegExp('^[A-D0-9.]*$'))
+      .required()
+      .messages({
+        'string.pattern.base': `nim allowed alphanumeric and . only!`
+      }),
     fullname: Joi.string()
       .pattern(new RegExp('^[a-zA-Z ]*$'))
       .required()
+      .uppercase()
       .messages({
         'string.pattern.base': `fullname allowed alphabet and space only!`
       }),
