@@ -13,6 +13,13 @@ const voterMulterStorage = multer.diskStorage({
   },
 })
 
+const voterFileMulterStorage = multer.diskStorage({
+  destination: 'backend',
+  filename: (req, file, cb) => {
+    cb(null, 'voterFile.xlsx')
+  },
+})
+
 const candidateMulterStorage = multer.diskStorage({
   destination: 'public/photo/candidates',
   filename: (req, file, cb) => {
@@ -39,6 +46,11 @@ const voterUpload = multer({
   limits: { fileSize: 1000000 }, // max 1MB per photo
 })
 
+// voter file upload
+const voterFileUpload = multer({
+  storage: voterFileMulterStorage
+})
+
 // use both above strorage & filter configuration
 const candidateUpload = multer({
   storage: candidateMulterStorage,
@@ -46,4 +58,5 @@ const candidateUpload = multer({
   limits: { fileSize: 1000000 }, // max 1MB per photo
 })
 
-module.exports = { voterUpload, candidateUpload }
+
+module.exports = { voterUpload, voterFileUpload, candidateUpload }
