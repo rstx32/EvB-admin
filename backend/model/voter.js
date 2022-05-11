@@ -3,9 +3,15 @@ const mongoosePaginate = require('mongoose-paginate-v2')
 
 // schema voter
 const voterSchema = new mongoose.Schema({
+  nim: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   fullname: {
     type: String,
@@ -13,7 +19,7 @@ const voterSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    default: "has not set yet",
+    default: null,
   },
   public_key: {
     type: String,
