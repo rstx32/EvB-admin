@@ -69,7 +69,20 @@
             </div>
         </div>
     </div>
+    <!-- end card add voter -->
+
     <!-- card add voter -->
+    <div class="col-lg-2 col-md-9 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <!-- modal button add voter -->
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importVoter">
+                    <i class="bi bi-person-plus">Import Voter XLSX</i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- end card add voter -->
 </div>
 
 <!-- Content Row -->
@@ -178,9 +191,9 @@
                                                                             <tbody>
                                                                                 <tr>
                                                                                     <th scope="row">
-                                                                                        ID</th>
+                                                                                        NIM</th>
                                                                                     <td>
-                                                                                        <%= v._id %>
+                                                                                        <%= v.nim %>
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
@@ -221,7 +234,7 @@
 
                                                     <!-- modal button delete voter -->
                                                     <form method="post" action="/voters?_method=DELETE">
-                                                        <input type="hidden" name="id" value="<%= v._id %>">
+                                                        <input type="hidden" name="email" value="<%= v.email %>">
                                                         <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" onclick="return confirm('are you sure?')">Delete</button>
                                                     </form>
                                                     <!-- end modal button delete voter -->
@@ -260,6 +273,7 @@
                                                     <form method="post" action="/voters?_method=PUT" enctype="multipart/form-data">
                                                         <!-- hidden input value -->
                                                         <input type="hidden" name="email" value="<%= v.email %>">
+                                                        <input type="hidden" name="nim" value="<%= v.nim %>">
                                                         
                                                         <!-- fullname -->
                                                         <div class="form-floating mb-3">
@@ -269,20 +283,11 @@
                                                             </label>
                                                         </div>
                                                         
-                                                        <!-- password -->
-                                                        <div class="form-floating">
-                                                            <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password">
-                                                            <label for="floatingPassword">
-                                                                New Password
-                                                            </label>
-                                                        </div>
-                                                        <br>
-                                                        
                                                         <!-- photo upload -->
                                                         <div class="mb-3">
                                                             <label for="formFileSm" class="form-label">Photo
                                                                 Upload</label>
-                                                            <input class="form-control form-control-sm" id="formFileSm" name="photo" type="file">
+                                                            <input class="form-control form-control-sm" id="formFileSm" name="voterPhotoUpload" type="file">
                                                         </div>
                                                         
                                                         <!-- submit -->
@@ -374,6 +379,12 @@
             <div class="modal-body">
                 <!-- form -->
                 <form method="post" action="/voters" enctype="multipart/form-data">
+                    <!-- nim -->
+                    <div class="form-floating mb-3">
+                        <input type="text" name="nim" class="form-control" id="floatingInput" placeholder="nim">
+                        <label for="floatingInput">NIM</label>
+                    </div>
+
                     <!-- fullname -->
                     <div class="form-floating mb-3">
                         <input type="text" name="fullname" class="form-control" id="floatingInput" placeholder="fullname">
@@ -402,3 +413,37 @@
     </div>
 </div>
 <!-- end modal box add voter -->
+
+<!-- modal box file upload voter -->
+<div class="modal fade" id="importVoter" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+
+            <!-- modal header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Import Voter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- end modal header -->
+
+            <!-- modal body -->
+            <div class="modal-body">
+                <!-- form -->
+                <form method="post" action="/voters-file" enctype="multipart/form-data">
+                    <!-- File upload -->
+                    <div class="mb-3">
+                        <label for="formFileSm" class="form-label">File Upload</label>
+                        <input class="form-control form-control-sm" id="formFileSm" name="voterFile" type="file">
+                    </div>
+                    <!-- submit -->
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </form>
+                <!-- end form -->
+
+            </div>
+            <!-- modal body -->
+
+        </div>
+    </div>
+</div>
+<!-- end modal box file upload voter -->

@@ -1,4 +1,5 @@
 require('dotenv').config({ path: './backend/.env' })
+const fs = require('fs')
 const express = require('express')
 const expressLayouts = require('express-ejs-layouts')
 const methodOverride = require('method-override')
@@ -6,6 +7,7 @@ const passport = require('passport')
 const session = require('express-session')
 const connectEnsureLogin = require('connect-ensure-login')
 const flash = require('connect-flash')
+const readXlsxFile = require('read-excel-file/node')
 const app = express()
   .set('view engine', 'ejs')
   .use(express.urlencoded({ extended: false }))
@@ -23,7 +25,7 @@ const app = express()
   .use(passport.session())
   .use(flash())
 
-const { voterUpload, candidateUpload } = require('./multer')
+const { voterUpload, voterFileUpload, candidateUpload } = require('./multer')
 const {
   getVoter,
   addVoter,
@@ -46,6 +48,7 @@ const {
 } = require('./validation')
 const voterPhoto = voterUpload.single('voterPhotoUpload')
 const candidatePhoto = candidateUpload.single('candidatePhotoUpload')
+const voterFile = voterFileUpload.single('voterFile')
 const User = require('./model/user')
 
 passport.use(User.createStrategy())
@@ -171,19 +174,39 @@ app.post('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
         req.flash('errorMessage', error.details)
         res.redirect('/voters')
       } else {
-        req.flash('successMessage', `success add new voter : ${value.email}`)
         addVoter(value, req.file)
+        req.flash('successMessage', `success add new voter : ${value.email}`)
         res.redirect('/voters')
       }
     }
   })
 })
 
+// voters file upload
+app.post('/voters-file', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
+  voterFile(req, res, (err) => {
+    readXlsxFile('backend/voterFile.xlsx').then((rows) => {
+      for(x=1; x<rows.length; x++){
+        const temp = {
+          nim: rows[x][0],
+          fullname: rows[x][1],
+          email: rows[x][2],
+        }
+  
+        addVoter(temp)
+      }
+      fs.unlinkSync('backend/voterFile.xlsx')
+      req.flash('successMessage', `success import voters`)
+      res.redirect('/voters')
+    })
+  })
+})
+
 // edit voters
-app.put('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+app.put('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   voterPhoto(req, res, (err) => {
     if (err) {
-      req.flash('message', 'invalid photo file!')
+      req.flash('errorMessage', 'invalid photo file!')
       res.redirect('/voters')
     } else {
       const { error, value } = voterValidation(req.body)
@@ -191,8 +214,8 @@ app.put('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
         req.flash('errorMessage', error.details)
         res.redirect('/voters')
       } else {
-        req.flash('successMessage', `success edit voter : ${value.email}`)
         editVoter(value, req.file)
+        req.flash('successMessage', `success edit voter : ${value.email}`)
         res.redirect('/voters')
       }
     }
@@ -201,8 +224,8 @@ app.put('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 
 // delete voters
 app.delete('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
-  deleteVoter(req.body.id)
-  req.flash('successMessage', `${req.body.id} deleted`)
+  deleteVoter(req.body.email)
+  req.flash('successMessage', `${req.body.email} deleted`)
   res.redirect('/voters')
 })
 
