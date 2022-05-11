@@ -24,20 +24,27 @@ const getSingleVoter = async (id) => {
 
 // add voter
 const addVoter = async (newVoter, newPhoto) => {
+  const newNim = newVoter.nim
   const newFullname = newVoter.fullname
   const newEmail = newVoter.email
 
   // if photo are none
   if (!newPhoto) {
-    await Voter.create({
-      fullname: newFullname,
-      email: newEmail,
-      photo: 'dummy.jpg',
-    })
+    try{
+      await Voter.create({
+        nim: newNim,
+        fullname: newFullname,
+        email: newEmail,
+        photo: 'dummy.jpg',
+      })
+    }catch(error){
+      return new Error("error bro!")
+    }
   }
   // if photo are inserted
   else {
     await Voter.create({
+      nim: newNim,
       fullname: newFullname,
       email: newEmail,
       photo: newPhoto.filename,
@@ -46,45 +53,43 @@ const addVoter = async (newVoter, newPhoto) => {
 }
 
 // delete voter
-const deleteVoter = async (id) => {
+const deleteVoter = async (paramEmail) => {
   // delete photo
-  deletePhotoVoter(id)
+  deletePhotoVoter(paramEmail)
 
   await Voter.deleteOne({
-    _id: id,
+    email: paramEmail,
   })
 }
 
 // edit voter
 const editVoter = async (newVoter, newPhoto) => {
-  const currentEmail = newVoter.email
+  const currentNIM = newVoter.nim
   const newFullname = newVoter.fullname
-  const newPassword = bcrypt.hashSync(newVoter.password, 8)
+  const email = newVoter.email
 
   // if photo are none, do nothing
   // if photo are inserted, delete old photo and replace with the new one
   if (!newPhoto) {
     await Voter.updateOne(
       {
-        email: currentEmail,
+        nim: currentNIM,
       },
       {
         $set: {
           fullname: newFullname,
-          password: newPassword,
         },
       }
     )
   } else {
-    deletePhotoVoter(id)
+    deletePhotoVoter(email)
     await Voter.updateOne(
       {
-        email: currentEmail,
+        nim: currentNIM,
       },
       {
         $set: {
           fullname: newFullname,
-          password: newPassword,
           photo: newPhoto.filename,
         },
       }
@@ -92,9 +97,15 @@ const editVoter = async (newVoter, newPhoto) => {
   }
 }
 
+const getVoterByEmail = async (email) => {
+  return await Voter.findOne({
+    email: email,
+  })
+}
+
 // delete photo
-const deletePhotoVoter = async (id) => {
-  const oldPhoto = await getSingleVoter(id)
+const deletePhotoVoter = async (email) => {
+  const oldPhoto = await getVoterByEmail(email)
   if (!oldPhoto) {
     return
   } else if (oldPhoto.photo !== 'dummy.jpg') {
