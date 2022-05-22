@@ -5,7 +5,6 @@ const fs = require('fs')
 const Voter = require('./model/voter')
 const Candidate = require('./model/candidate')
 const Validator = require('./model/validator')
-const e = require('connect-flash')
 mongoose.connect(`${process.env.MONGODB_URL}`)
 
 //////////// voter ///////////////
@@ -213,7 +212,7 @@ const addCandidate = async (newCandidate, newPhoto) => {
 // delete candidate
 const deleteCandidate = async (id) => {
   // delete photo
-  deletePhotoCandidate(id, 'candidates')
+  deletePhoto(id, 'candidates')
 
   await Candidate.deleteOne({
     _id: id,
