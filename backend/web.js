@@ -8,6 +8,7 @@ const session = require('express-session')
 const connectEnsureLogin = require('connect-ensure-login')
 const flash = require('connect-flash')
 const readXlsxFile = require('read-excel-file/node')
+const fetch = require('node-fetch')
 const app = express()
   .set('view engine', 'ejs')
   .use(express.urlencoded({ extended: false }))
@@ -27,7 +28,7 @@ const app = express()
 
 const { voterUpload, voterFileUpload, candidateUpload } = require('./multer')
 const {
-  getVoter,
+  getVoters,
   addVoter,
   getSingleVoter,
   deleteVoter,
@@ -36,10 +37,12 @@ const {
   isPubkeyExist,
   getVoterPubkey,
   getvoterpasswd,
-  candidateCount,
+  searchVoter,
   getCandidate,
   addCandidate,
   deleteCandidate,
+  getValidator,
+  solveError,
 } = require('./db')
 const {
   voterValidation,
@@ -49,11 +52,11 @@ const {
 const voterPhoto = voterUpload.single('voterPhotoUpload')
 const candidatePhoto = candidateUpload.single('candidatePhotoUpload')
 const voterFile = voterFileUpload.single('voterFile')
-const User = require('./model/user')
+const Admin = require('./model/admin')
 
-passport.use(User.createStrategy())
-passport.serializeUser(User.serializeUser())
-passport.deserializeUser(User.deserializeUser())
+passport.use(Admin.createStrategy())
+passport.serializeUser(Admin.serializeUser())
+passport.deserializeUser(Admin.deserializeUser())
 
 // register page
 app.get('/register', (req, res) => {
@@ -80,7 +83,7 @@ app.post('/register', async (req, res) => {
       req.flash('message', `${req.body.id} has been registered!`)
       res.redirect('register')
     } else {
-      const voter = await getSingleVoter(req.body.id)
+      const voter = await getSingleVoter(req.body.id, 'getbyid')
       const selectedVoter = voter.id
       res.render('auth/register-2', {
         layout: 'auth/register-2',
@@ -110,7 +113,7 @@ app.get('/login', (req, res) => {
   res.render('auth/login', {
     layout: 'auth/login',
     title: 'login',
-    flashMessage: {errorMessage,successMessage},
+    flashMessage: { errorMessage, successMessage },
   })
 })
 
@@ -141,17 +144,11 @@ app.get('/', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
 /////////////////////////////////////////// voters ///////////////////////////////////////////
 // get all voters
 app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
-  // if query is empty, then add default query
-  if (Object.keys(req.query).length === 0) {
-    req.query = {
-      limit: 5,
-      page: 1,
-    }
-  }
-  const voters = await getVoter(req.query)
+  const voters = await getVoters(req.query)
   const errorMessage = req.flash('errorMessage')
   const successMessage = req.flash('successMessage')
   const user = req.user.username
+  const validator = await getValidator()
 
   res.render('voters', {
     layout: 'layouts/main-layout',
@@ -159,6 +156,7 @@ app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     voters,
     user,
     flashMessage: { errorMessage, successMessage },
+    validator,
   })
 })
 
@@ -182,17 +180,17 @@ app.post('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   })
 })
 
-// voters file upload
+// voters xlsx file upload
 app.post('/voters-file', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   voterFile(req, res, (err) => {
     readXlsxFile('backend/voterFile.xlsx').then((rows) => {
-      for(x=1; x<rows.length; x++){
+      for (x = 1; x < rows.length; x++) {
         const temp = {
           nim: rows[x][0],
           fullname: rows[x][1],
           email: rows[x][2],
         }
-  
+
         addVoter(temp)
       }
       fs.unlinkSync('backend/voterFile.xlsx')
@@ -222,13 +220,6 @@ app.put('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
   })
 })
 
-// delete voters
-app.delete('/voters', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
-  deleteVoter(req.body.email)
-  req.flash('successMessage', `${req.body.email} deleted`)
-  res.redirect('/voters')
-})
-
 // export voter pubkey
 app.get('/voter/pubkey/:id', async (req, res) => {
   const { error } = idValidation(new Object({ id: req.params.id }))
@@ -249,8 +240,8 @@ app.get('/voter/passwd/:id', async (req, res) => {
 
 // export a voter
 app.get('/voter/:id', async (req, res) => {
-  const voters = await getSingleVoter(req.params.id)
-  res.send(voters)
+  const voter = await getSingleVoter(req.params.id, 'getbyid')
+  res.send(voter)
 })
 /////////////////////////////////////// end of voters ////////////////////////////////////////
 
@@ -260,19 +251,19 @@ app.get(
   '/candidates',
   connectEnsureLogin.ensureLoggedIn(),
   async (req, res) => {
-    const allCandidates = await candidateCount()
     const candidate = await getCandidate()
     const user = req.user.username
     const errorMessage = req.flash('errorMessage')
     const successMessage = req.flash('successMessage')
+    const validator = await getValidator()
 
     res.render('candidates', {
       layout: 'layouts/main-layout',
       title: 'candidates',
       user,
       candidate,
-      allCandidates,
       flashMessage: { errorMessage, successMessage },
+      validator,
     })
   }
 )
@@ -293,7 +284,10 @@ app.post(
           req.flash('errorMessage', error.details)
           res.redirect('/candidates')
         } else {
-          req.flash('successMessage', `success add new candidate : ${value.candidate}`)
+          req.flash(
+            'successMessage',
+            `success add new candidate : ${value.candidate}`
+          )
           addCandidate(value, req.file)
           res.redirect('/candidates')
         }
@@ -301,19 +295,41 @@ app.post(
     })
   }
 )
-
-// delete candidates
-app.delete('/candidates', connectEnsureLogin.ensureLoggedIn(), (req, res) => {
-  deleteCandidate(req.body.id)
-  res.redirect('/candidates')
-})
-
-// API export voters
-app.get('/getcandidates', async (req, res) => {
-  const voters = await getCandidate()
-  res.json(voters)
-})
 /////////////////////////////////////// end of candidates ////////////////////////////////////////
+
+// delete data
+app.delete('/:type', connectEnsureLogin.ensureLoggedIn(), (req, res, next) => {
+  if (req.params.type === 'voter') {
+    deleteVoter(req.body.email)
+    req.flash('successMessage', `${req.body.email} deleted`)
+    res.redirect('/voters')
+  } else if (req.params.type === 'candidate') {
+    deleteCandidate(req.body.id)
+    req.flash('successMessage', `candidate deleted`)
+    res.redirect('/candidates')
+  } else {
+    next()
+  }
+})
+
+// export data to validator
+app.get('/export/:type', async (req, res) => {
+  if (req.params.type === 'voter') {
+    const voters = await getVoters(req.query)
+    res.json(voters)
+  } else if (req.params.type === 'candidate') {
+    const candidates = await getCandidate()
+    res.json(candidates)
+  } else {
+    res.send('invalid request')
+  }
+})
+
+// solve error
+app.post('/solve/:type', async (req, res) => {
+  solveError(req.body, req.params.type)
+  res.redirect(`/${req.params.type}s`)
+})
 
 // page not found
 app.use((req, res) => {
@@ -332,4 +348,4 @@ app.listen(process.env.HTTP_PORT, () => {
 })
 
 // run this for the first time!
-// User.register({username: 'user', active: false}, '123')
+// Admin.register({username: 'admin', active: false}, '123')

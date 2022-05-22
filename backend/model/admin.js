@@ -9,11 +9,11 @@ mongoose.connect(process.env.MONGODB_URL, {
 })
 
 // schema user admin
-const User = new mongoose.Schema({
+const Admin = new mongoose.Schema({
   username: String,
   password: String,
 })
 
-User.plugin(passportLocalMongoose)
+Admin.plugin(passportLocalMongoose)
 
-module.exports = mongoose.model('User', User)
+module.exports = mongoose.model('Admin', Admin)

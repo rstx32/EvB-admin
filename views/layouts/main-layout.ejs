@@ -5,11 +5,11 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" type="image/x-icon" href="/EvB.png">
+    <link rel="icon" type="image/x-icon" href="http://localhost:<%= process.env.HTTP_PORT %>/EvB.png">
     <title>EvB Admin - <%= title %> </title>
 
-    <link href="assets/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="assets/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="http://localhost:<%= process.env.HTTP_PORT %>/assets/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="http://localhost:<%= process.env.HTTP_PORT %>/assets/css/sb-admin-2.min.css" rel="stylesheet">
     
 </head>
 
@@ -24,7 +24,7 @@
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
                 <div class="sidebar-brand-icon">
-                    <img src="/EvB.png" alt="" width="auto" height="50px">
+                    <img src="http://localhost:<%= process.env.HTTP_PORT %>/EvB.png" alt="" width="auto" height="50px">
                 </div>
                 <div class="sidebar-brand-text mx-3">EvB Admin</div>
             </a>
@@ -155,8 +155,8 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
-    <script src="assets/jquery/jquery.min.js"></script>
-    <script src="assets/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="http://localhost:<%= process.env.HTTP_PORT %>/assets/jquery/jquery.min.js"></script>
+    <script src="http://localhost:<%= process.env.HTTP_PORT %>/assets/bootstrap/bootstrap.bundle.min.js"></script>
 
 </body>
 

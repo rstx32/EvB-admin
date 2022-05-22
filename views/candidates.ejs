@@ -41,7 +41,7 @@
 <!-- end success flash -->
 
 <div class="row">
-    <!-- card voter count -->
+    <!-- card candidate count -->
     <div class="col-xl-2 col-md-6 mb-4">
         <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
@@ -50,27 +50,119 @@
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                             Total Candidate
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= allCandidates %></div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= candidate.length %></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- end card voter count -->
+    <!-- end card candidate count -->
 
-    <!-- card add voter -->
+    <!-- card add candidate -->
     <div class="col-lg-2 col-md-9 mb-4">
         <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
-                <!-- modal button add voter -->
+                <!-- modal button add candidate -->
                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addCandidate">
                     <i class="bi bi-person-plus">Add Candidate</i>
                 </button>
             </div>
         </div>
     </div>
-    <!-- card add voter -->
+    <!-- card add candidate -->
 </div>
+
+<% count = 0 %> 
+<% validator.forEach( v => { %>
+    <% if (v.candidateStatus==='invalid') { %>
+        <%  count++ %> 
+    <% } %>
+<% }) %>
+
+<% if (count>0) { %>
+    <!-- Error validation table -->
+    <div class="row">
+        <div class="col-lg-4">
+            <!-- card candidate -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">candidate Error!</h6>
+                </div>
+                <div class="card-body">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Reason</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Solve</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <% let index=1 %> 
+                        <% validator.forEach( v => { %>
+                            <% if (v.candidateStatus==="invalid") { %>
+                                <tr>
+                                  <th scope="row"><%= index %></th>
+                                  <td><%= v.candidateReason %></td>
+                                  <td>
+                                      <% if (v.candidateSolve==='solved') { %>
+                                        solved, waiting for validator response
+                                      <% } else if (v.candidateSolve==='reject') { %>
+                                        rejected, please solve the error
+                                      <% } else { %>
+                                        <%= v.candidateSolve %>  
+                                      <% } %> 
+                                  </td>
+                                  <td>
+
+                                    <% if (v.candidateSolve==='solved') { %>
+                                     -
+                                    <% } else { %> 
+                                        <!-- Button trigger modal -->
+                                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#solveConfirmation-<%= v.validator %>">
+                                            <i class="bi bi-check2-square"></i>
+                                        </button>
+                                        <!-- Button trigger modal -->
+
+                                        <!-- Modal box solve confirmation -->
+                                        <div class="modal fade" id="solveConfirmation-<%= v.validator %>" tabindex="-1" aria-labelledby="solveConfirmation" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="exampleModalLabel">Have you been solve thsi error?</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+
+                                                    <div class="modal-body">
+                                                        <%= v.candidateReason %>
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <form action="/solve/candidate" method="post" id="formSolve">
+                                                            <input type="hidden" name="validator" value="<%= v._id %>">
+                                                            <button type="submit" class="btn btn-success">Yes, it's solved</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Modal box solve confirmation -->
+                                    <% } %> 
+                                  </td>
+                                </tr>
+                                <%  index++ %> 
+                            <% } %>
+                        <% }) %>
+                      </tbody>
+                  </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Error validation table -->
+<% } %>
 
 <div class="row">
     <% candidate.forEach(c=> { %>
@@ -90,7 +182,7 @@
                 </h5>
                 <h6 class="card-subtitle mb-2 text-muted"><%= c.viceCandidate %></h6>
                 
-                <form method="post" action="/candidates?_method=DELETE">
+                <form method="post" action="/candidate?_method=DELETE">
                     <input type="hidden" name="id" value="<%= c._id %>">
                     <button class="btn btn-danger btn-circle" type="submit" data-bs-dismiss="modal" onclick="return confirm('are you sure?')"> 
                         <i class="fas fa-trash"></i>

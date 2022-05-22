@@ -4,58 +4,72 @@ const bcrypt = require('bcryptjs')
 const fs = require('fs')
 const Voter = require('./model/voter')
 const Candidate = require('./model/candidate')
+const Validator = require('./model/validator')
+const e = require('connect-flash')
 mongoose.connect(`${process.env.MONGODB_URL}`)
 
 //////////// voter ///////////////
 
 // get all voter
-const getVoter = async (query) => {
-  const options = {
-    page: query.page,
-    limit: query.limit,
+const getVoters = async (query) => {
+  // if query is empty, then add default query
+  if (Object.keys(query).length === 0) {
+    query = {
+      limit: 5,
+      page: 1,
+    }
   }
-  return await Voter.paginate({}, options)
+
+  if (query.fullname === undefined) {
+    return await Voter.paginate(
+      {},
+      {
+        page: query.page,
+        limit: query.limit,
+      }
+    )
+  } else {
+    console.log(query)
+    const match = query.fullname.toUpperCase()
+    return await Voter.paginate(
+      { fullname: { $regex: match } },
+      { pagination: false }
+    )
+  }
 }
 
 // get a voter
-const getSingleVoter = async (id) => {
-  return await Voter.findById(id)
+const getSingleVoter = async (key, type) => {
+  if (type === 'findbyid') return await Voter.findById(key)
+  else if (type === 'findbyemail')
+    return await Voter.findOne({
+      email: email,
+    })
 }
 
 // add voter
 const addVoter = async (newVoter, newPhoto) => {
-  const newNim = newVoter.nim
-  const newFullname = newVoter.fullname
-  const newEmail = newVoter.email
-
-  // if photo are none
-  if (!newPhoto) {
-    try{
-      await Voter.create({
-        nim: newNim,
-        fullname: newFullname,
-        email: newEmail,
-        photo: 'dummy.jpg',
-      })
-    }catch(error){
-      return new Error("error bro!")
-    }
+  let photo = 'dummy.jpg'
+  if (newPhoto !== undefined) {
+    photo = newPhoto.filename
   }
-  // if photo are inserted
-  else {
+
+  try {
     await Voter.create({
-      nim: newNim,
-      fullname: newFullname,
-      email: newEmail,
-      photo: newPhoto.filename,
+      nim: newVoter.nim,
+      fullname: newVoter.fullname,
+      email: newVoter.email,
+      photo: photo,
     })
+  } catch (error) {
+    return new Error('error bro!')
   }
 }
 
 // delete voter
 const deleteVoter = async (paramEmail) => {
   // delete photo
-  deletePhotoVoter(paramEmail)
+  deletePhoto(paramEmail, 'voters')
 
   await Voter.deleteOne({
     email: paramEmail,
@@ -82,7 +96,7 @@ const editVoter = async (newVoter, newPhoto) => {
       }
     )
   } else {
-    deletePhotoVoter(email)
+    deletePhoto(email, 'voters')
     await Voter.updateOne(
       {
         nim: currentNIM,
@@ -97,19 +111,16 @@ const editVoter = async (newVoter, newPhoto) => {
   }
 }
 
-const getVoterByEmail = async (email) => {
-  return await Voter.findOne({
-    email: email,
-  })
-}
-
 // delete photo
-const deletePhotoVoter = async (email) => {
-  const oldPhoto = await getVoterByEmail(email)
+const deletePhoto = async (key, type) => {
+  let oldPhoto = {}
+  if (type === 'voters') oldPhoto = await getSingleVoter(key, 'getbyemail')
+  else if (type === 'candidates') oldPhoto = await getSingleCandidate(key)
+
   if (!oldPhoto) {
     return
   } else if (oldPhoto.photo !== 'dummy.jpg') {
-    fs.unlink(`public/photo/voters/${oldPhoto.photo}`, (err) => {
+    fs.unlink(`public/photo/${type}/${oldPhoto.photo}`, (err) => {
       if (err) {
         console.error(err)
         return
@@ -123,7 +134,8 @@ const deletePhotoVoter = async (email) => {
 // return 2 : public key is filled
 // return 3 : public key is null
 const isPubkeyExist = async (id) => {
-  const voter = await getSingleVoter(id)
+  const voter = await getSingleVoter(id, 'findbyid')
+
   if (voter === null) {
     return 1
   } else if (voter.public_key !== null) {
@@ -171,16 +183,9 @@ const getVoterPubkey = async (id) => {
 const getvoterpasswd = async (id) => {
   return await Voter.findById(id).select('password')
 }
-
 //////////// end of voter ///////////////
 
 //////////// candidate ///////////////
-
-// count all documents
-const candidateCount = async () => {
-  return await Candidate.countDocuments()
-}
-
 // get all candidate
 const getCandidate = async () => {
   return await Candidate.find()
@@ -193,55 +198,56 @@ const getSingleCandidate = async (id) => {
 
 // add candidate
 const addCandidate = async (newCandidate, newPhoto) => {
-  const candidateName = newCandidate.candidate
-  const viceCandidateName = newCandidate.viceCandidate
+  let photo = 'dummy.jpg'
+  if (newPhoto !== undefined) {
+    photo = newPhoto.filename
+  }
 
-  // if photo are none
-  if (!newPhoto) {
-    await Candidate.create({
-      candidate: candidateName,
-      viceCandidate: viceCandidateName,
-      photo: 'dummy.jpg',
-    })
-  }
-  // if photo are inserted
-  else {
-    await Candidate.create({
-      candidate: candidateName,
-      viceCandidate: viceCandidateName,
-      photo: newPhoto.filename,
-    })
-  }
+  await Candidate.create({
+    candidate: newCandidate.candidate,
+    viceCandidate: newCandidate.viceCandidate,
+    photo: photo,
+  })
 }
 
 // delete candidate
 const deleteCandidate = async (id) => {
   // delete photo
-  deletePhotoCandidate(id)
+  deletePhotoCandidate(id, 'candidates')
 
   await Candidate.deleteOne({
     _id: id,
   })
 }
 
-// delete photo
-const deletePhotoCandidate = async (id) => {
-  const oldPhoto = await getSingleCandidate(id)
-  if (!oldPhoto) {
-    return
-  } else if (oldPhoto.photo !== 'dummy.jpg') {
-    fs.unlink(`public/photo/candidates/${oldPhoto.photo}`, (err) => {
-      if (err) {
-        console.error(err)
-        return
-      }
-    })
-  }
-}
 //////////// end of candidate ///////////////
 
+// get validation
+const getValidator = async () => {
+  return await Validator.find()
+}
+
+// solve error
+const solveError = async (data, type) => {
+  if (type === 'voter') {
+    await Validator.updateOne(
+      { _id: data.validator },
+      {
+        voterSolve: 'solved',
+      }
+    )
+  } else if (type === 'candidate') {
+    await Validator.updateOne(
+      { _id: data.validator },
+      {
+        candidateSolve: 'solved',
+      }
+    )
+  }
+}
+
 module.exports = {
-  getVoter,
+  getVoters,
   getSingleVoter,
   addVoter,
   deleteVoter,
@@ -250,8 +256,9 @@ module.exports = {
   isPubkeyExist,
   getVoterPubkey,
   getvoterpasswd,
-  candidateCount,
   getCandidate,
   addCandidate,
   deleteCandidate,
+  getValidator,
+  solveError,
 }
