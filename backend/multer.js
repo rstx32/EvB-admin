@@ -39,6 +39,15 @@ const multerFilter = (req, file, cb) => {
   }
 }
 
+// filter for upload voter XLSX
+const xlsxFilter = (req, file, cb) => {
+  if (file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.mimetype === 'application/vnd.ms-excel') {
+    cb(null, true)
+  } else {
+    cb(new Error('Not a XLSX File!'), false)
+  }
+}
+
 // use both above strorage & filter configuration
 const voterUpload = multer({
   storage: voterMulterStorage,
@@ -48,7 +57,8 @@ const voterUpload = multer({
 
 // voter file upload
 const voterFileUpload = multer({
-  storage: voterFileMulterStorage
+  storage: voterFileMulterStorage,
+  fileFilter: xlsxFilter
 })
 
 // use both above strorage & filter configuration

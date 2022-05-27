@@ -74,7 +74,7 @@
 
 <% count = 0 %> 
 <% validator.forEach( v => { %>
-    <% if (v.candidateStatus==='invalid') { %>
+    <% if (v.candidate.status==='invalid') { %>
         <%  count++ %> 
     <% } %>
 <% }) %>
@@ -101,22 +101,22 @@
                     <tbody>
                         <% let index=1 %> 
                         <% validator.forEach( v => { %>
-                            <% if (v.candidateStatus==="invalid") { %>
+                            <% if (v.candidate.status==="invalid") { %>
                                 <tr>
                                   <th scope="row"><%= index %></th>
-                                  <td><%= v.candidateReason %></td>
+                                  <td><%= v.candidate.reason %></td>
                                   <td>
-                                      <% if (v.candidateSolve==='solved') { %>
+                                      <% if (v.candidate.solve==='solved') { %>
                                         solved, waiting for validator response
-                                      <% } else if (v.candidateSolve==='reject') { %>
+                                      <% } else if (v.candidate.solve==='reject') { %>
                                         rejected, please solve the error
                                       <% } else { %>
-                                        <%= v.candidateSolve %>  
+                                        <%= v.candidate.solve %>  
                                       <% } %> 
                                   </td>
                                   <td>
 
-                                    <% if (v.candidateSolve==='solved') { %>
+                                    <% if (v.candidate.solve==='solved') { %>
                                      -
                                     <% } else { %> 
                                         <!-- Button trigger modal -->
@@ -136,7 +136,7 @@
                                                     </div>
 
                                                     <div class="modal-body">
-                                                        <%= v.candidateReason %>
+                                                        <%= v.candidate.reason %>
                                                     </div>
 
                                                     <div class="modal-footer">
@@ -182,7 +182,7 @@
                 </h5>
                 <h6 class="card-subtitle mb-2 text-muted"><%= c.viceCandidate %></h6>
                 
-                <form method="post" action="/candidate?_method=DELETE">
+                <form method="post" action="/candidates?_method=DELETE">
                     <input type="hidden" name="id" value="<%= c._id %>">
                     <button class="btn btn-danger btn-circle" type="submit" data-bs-dismiss="modal" onclick="return confirm('are you sure?')"> 
                         <i class="fas fa-trash"></i>
@@ -207,15 +207,14 @@
             <!-- modal body -->
             <div class="modal-body">
                 <!-- form -->
-                <form method="POST" action="/candidates" enctype="multipart/form-data">
+                <form method="post" action="/candidates" enctype="multipart/form-data">
                     <!-- candidate -->
                     <div class="input-group mb-3">
                         <input type="text" name="candidate" class="form-control" placeholder="candidate name">
                     </div>
                     <!-- vice candidate -->
                     <div class="input-group mb-3">
-                        <input type="text" name="viceCandidate" class="form-control"
-                            placeholder="vice candidate name">
+                        <input type="text" name="viceCandidate" class="form-control" placeholder="vice candidate name">
                     </div>
                     <!-- photo upload -->
                     <div class="mb-3">

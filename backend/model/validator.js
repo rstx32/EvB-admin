@@ -8,34 +8,39 @@ const validatorSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-  }, 
-  voterStatus: {
-    type: String,
-    enum: ['-', 'valid', 'invalid'],
-    default: '-'
   },
-  candidateStatus: {
-    type: String,
-    enum: ['-', 'valid', 'invalid'],
-    default: '-'
+  token: String,
+  voter: {
+    status: {
+      type: String,
+      enum: ['-', 'valid', 'invalid'],
+      default: '-',
+    },
+    reason: {
+      type: String,
+      default: '-',
+    },
+    solve: {
+      type: String,
+      enum: ['-', 'solved', 'unsolved', 'reject', 'accept'],
+      default: '-',
+    },
   },
-  voterReason: {
-    type: String,
-    default: '-'
-  },
-  candidateReason: {
-    type: String,
-    default: '-'
-  },
-  voterSolve: {
-    type: String,
-    enum: ['-', 'solved', 'unsolved', 'reject', 'accept'],
-    default: '-'
-  },
-  candidateSolve: {
-    type: String,
-    enum: ['-', 'solved', 'unsolved', 'reject', 'accept'],
-    default: '-'
+  candidate: {
+    status: {
+      type: String,
+      enum: ['-', 'valid', 'invalid'],
+      default: '-',
+    },
+    reason: {
+      type: String,
+      default: '-',
+    },
+    solve: {
+      type: String,
+      enum: ['-', 'solved', 'unsolved', 'reject', 'accept'],
+      default: '-',
+    },
   },
 })
 

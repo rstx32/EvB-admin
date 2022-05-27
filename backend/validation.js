@@ -3,18 +3,15 @@ const Joi = require('joi')
 // validation for voter
 const voterValidation = (voter) => {
   const schema = Joi.object({
-    nim: Joi.string()
-      .pattern(new RegExp('^[A-D0-9.]*$'))
-      .required()
-      .messages({
-        'string.pattern.base': `nim allowed alphanumeric and . only!`
-      }),
+    nim: Joi.string().pattern(new RegExp('^[A-D0-9.]*$')).required().messages({
+      'string.pattern.base': `nim allowed alphanumeric and . only!`,
+    }),
     fullname: Joi.string()
       .pattern(new RegExp('^[a-zA-Z ]*$'))
       .required()
       .uppercase()
       .messages({
-        'string.pattern.base': `fullname allowed alphabet and space only!`
+        'string.pattern.base': `fullname allowed alphabet and space only!`,
       }),
     email: Joi.string().email().required(),
     password: Joi.string().min(5).messages({
@@ -46,12 +43,28 @@ const candidateValidation = (candidate) => {
   return schema.validate(candidate, { abortEarly: false })
 }
 
-// validation for voterID
-const idValidation = (voterID) => {
-  const schema = Joi.object({
-    id: Joi.string().hex().min(24).max(24),
-  })
-  return schema.validate(voterID)
+// voter field validation
+const voterValidate = (key, type) => {
+  let schema
+  if (type === 'validateByKey') {
+    schema = Joi.object({
+      key: Joi.string()
+        .min(6)
+        .max(6)
+        .pattern(new RegExp('^[a-zA-Z0-9]*$'))
+        .required(),
+    })
+  } else if (type === 'validateByNim') {
+    schema = Joi.object({
+      nim: Joi.string()
+        .pattern(new RegExp('^[A-D0-9.]*$'))
+        .required()
+        .messages({
+          'string.pattern.base': `nim allowed alphanumeric and . only!`,
+        }),
+    })
+  }
+  return schema.validate(key)
 }
 
-module.exports = { voterValidation, candidateValidation, idValidation }
+module.exports = { voterValidation, candidateValidation, voterValidate }

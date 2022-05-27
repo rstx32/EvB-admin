@@ -12,6 +12,16 @@ mongoose.connect(process.env.MONGODB_URL, {
 const Admin = new mongoose.Schema({
   username: String,
   password: String,
+  voterAccess: {
+    type: String,
+    enum: ['allow', 'deny'],
+    default: 'allow',
+  },
+  candidateAccess: {
+    type: String,
+    enum: ['allow', 'deny'],
+    default: 'allow',
+  },
 })
 
 Admin.plugin(passportLocalMongoose)

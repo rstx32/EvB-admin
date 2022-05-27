@@ -4,7 +4,7 @@
 
 <!-- error flash -->
 <% if (flashMessage.errorMessage.length > 0) { %>
-    <% if (flashMessage.errorMessage[0] === 'invalid photo file!') { %>
+    <% if (flashMessage.errorMessage[0] === 'invalid photo file!' || flashMessage.errorMessage[0] === 'invalid spreadsheet file!' || flashMessage.errorMessage[0] === 'voter has been locked!') { %>
     <div class="card mb-4 py-3 border-left-danger">
         <div class="card-body">
             <code>
@@ -77,17 +77,18 @@
             <div class="card-body">
                 <!-- modal button add voter -->
                 <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importVoter">
-                    <i class="bi bi-person-plus">Import Voter XLSX</i>
+                    <i class="bi bi-cloud-upload"> Import Voter XLSX</i>
                 </button>
             </div>
         </div>
     </div>
     <!-- end card add voter -->
+
 </div>
 
 <% count = 0 %> 
 <% validator.forEach( v => { %>
-    <% if (v.voterStatus==='invalid') { %>
+    <% if (v.voter.status==='invalid') { %>
         <%  count++ %> 
     <% } %>
 <% }) %>
@@ -114,22 +115,22 @@
                     <tbody>
                         <% let index=1 %> 
                         <% validator.forEach( v => { %>
-                            <% if (v.voterStatus==="invalid") { %>
+                            <% if (v.voter.status==="invalid") { %>
                                 <tr>
                                   <th scope="row"><%= index %></th>
-                                  <td><%= v.voterReason %></td>
+                                  <td><%= v.voter.reason %></td>
                                   <td>
-                                      <% if (v.voterSolve==='solved') { %>
+                                      <% if (v.voter.solve==='solved') { %>
                                         solved, waiting for validator response
-                                      <% } else if (v.voterSolve==='reject') { %>
+                                      <% } else if (v.voter.solve==='reject') { %>
                                         rejected, please solve the error
                                       <% } else { %>
-                                        <%= v.voterSolve %>  
+                                        <%= v.voter.solve %>  
                                       <% } %> 
                                   </td>
                                   <td>
 
-                                    <% if (v.voterSolve==='solved') { %>
+                                    <% if (v.voter.solve==='solved') { %>
                                      -
                                     <% } else { %> 
                                         <!-- Button trigger modal -->
@@ -144,12 +145,12 @@
                                                 <div class="modal-content">
 
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="exampleModalLabel">Have you been solve thsi error?</h5>
+                                                        <h5 class="modal-title" id="exampleModalLabel">Have you been solve this error?</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
 
                                                     <div class="modal-body">
-                                                        <%= v.voterReason %>
+                                                        <%= v.voter.reason %>
                                                     </div>
 
                                                     <div class="modal-footer">
@@ -300,20 +301,6 @@
                                                                                         <%= v.email %>
                                                                                     </td>
                                                                                 </tr>
-                                                                                <tr>
-                                                                                    <th scope="row">
-                                                                                        Password</th>
-                                                                                    <td>
-                                                                                        <%= v.password %>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th scope="row">
-                                                                                        Public Key</th>
-                                                                                    <td>
-                                                                                        <%= v.public_key %>
-                                                                                    </td>
-                                                                                </tr>
                                                                             </tbody>
                                                                         </table>
                                                                     </div>
@@ -330,7 +317,7 @@
                                                 <div class="modal-footer">
 
                                                     <!-- modal button delete voter -->
-                                                    <form method="post" action="/voter?_method=DELETE">
+                                                    <form method="post" action="/voters?_method=DELETE">
                                                         <input type="hidden" name="email" value="<%= v.email %>">
                                                         <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" onclick="return confirm('are you sure?')">Delete</button>
                                                     </form>
@@ -530,7 +517,7 @@
                     <!-- File upload -->
                     <div class="mb-3">
                         <label for="formFileSm" class="form-label">File Upload</label>
-                        <input class="form-control form-control-sm" id="formFileSm" name="voterFile" type="file">
+                        <input class="form-control form-control-sm" id="formFileSm" name="voterFile" type="file" accept=".xlsx, .xls">
                     </div>
                     <!-- submit -->
                     <button type="submit" class="btn btn-success">Submit</button>
