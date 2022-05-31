@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './backend/.env' })
+require('dotenv').config({ path: './backend/config/.env' })
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const fs = require('fs')
@@ -9,7 +9,7 @@ const Admin = require('./model/admin')
 const Complaint = require('./model/complaint')
 const jwt = require('jsonwebtoken')
 const randomstring = require('randomstring')
-const nodemailer = require('nodemailer')
+const { gmail, mailtrap } = require('./email')
 const ejs = require('ejs')
 mongoose.connect(`${process.env.MONGODB_URL}`)
 
@@ -362,63 +362,107 @@ const solveComplaint = async (data) => {
 
 // reset password
 const sendResetKey = async (email) => {
-  const voter = await getSingleVoter(email, 'findbyemail')
-  if (voter !== null) {
+  let account = await getAdmin(email, 'findbyemail')
+  let type = 'admin'
+
+  if (account === null) {
+    account = await getSingleVoter(email, 'findbyemail')
+    type = 'voter'
+  }
+
+  if (account !== null) {
     const randomkey = randomstring.generate(6)
-    await Voter.updateOne(
-      {
-        email: email,
-      },
-      {
-        $set: {
-          'key.reset_password': randomkey,
+
+    if (type === 'admin') {
+      await Admin.updateOne(
+        {
+          email: email,
         },
-      }
-    )
+        {
+          $set: {
+            key: randomkey,
+          },
+        }
+      )
 
-    const mailtrap = nodemailer.createTransport({
-      host: 'smtp.mailtrap.io',
-      port: 2525,
-      auth: {
-        user: '4e56d2a27d9572',
-        pass: '81878f80487ec9',
-      },
-    })
+      mailtrap.sendMail({
+        from: 'evb-organizer@evb.com',
+        to: email,
+        subject: 'Admin Reset Password',
+        text: `admin password reset key : ${randomkey}`,
+      })
+    } else if (type === 'voter') {
+      await Voter.updateOne(
+        {
+          email: email,
+        },
+        {
+          $set: {
+            'key.reset_password': randomkey,
+          },
+        }
+      )
 
-    const fileHTML = await ejs.renderFile('views/email.ejs', {
-      voter: voter.fullname,
-      reset_password: randomkey,
-    })
+      const fileHTML = await ejs.renderFile('views/email.ejs', {
+        voter: account.fullname,
+        reset_password: randomkey,
+      })
 
-    const mailOptions = {
-      from: 'evb-organizer@evb.com',
-      to: voter.email,
-      subject: 'Voter Reset Password',
-      html: fileHTML,
+      mailtrap.sendMail({
+        from: 'evb-organizer@evb.com',
+        to: email,
+        subject: 'Voter Reset Password',
+        html: fileHTML,
+      })
     }
-    mailtrap.sendMail(mailOptions)
+
     return true
   } else {
     return false
   }
 }
 
-// reset voter password
+// reset voter/admin password
 const resetPassword = async (data) => {
-  const voterPassword = await bcrypt.hash(data.password, 8)
-  const resetKey = data.reset_key
-  const voter = await Voter.updateOne(
-    {
-      'key.reset_password': resetKey,
-    },
-    {
-      $set: {
-        password: voterPassword,
-        'key.reset_password': null,
+  let account = await getAdmin(data.reset_key, 'findbykey')
+  let type = 'admin'
+
+  if (account === null) {
+    account = await getSingleVoter(data.reset_key, 'findbyresetkey')
+    type = 'voter'
+  }
+
+  let result
+  if (type === 'admin') {
+    result = await Admin.findByUsername(account.username)
+    await result.setPassword(data.password)
+    await result.save()
+
+    await Admin.updateOne(
+      {
+        username: account.username,
       },
-    }
-  )
-  return voter
+      {
+        $set: {
+          key: null,
+        },
+      }
+    )
+  } else if (type === 'voter') {
+    const newPassword = await bcrypt.hash(data.password, 8)
+    result = await Voter.updateOne(
+      {
+        email: account.email,
+      },
+      {
+        $set: {
+          password: newPassword,
+          'key.reset_password': null,
+        },
+      }
+    )
+  }
+  return result
 }
 
 // delete unused photo voter/candidate if exist
@@ -441,7 +485,8 @@ const removeUnusedPhoto = async () => {
     })
 
     if (temp === 0) {
-      fs.unlinkSync(`./public/photo/voters/${voterPhotoList[x]}`)
+      if (voterPhotoList[x] !== 'dummy.jpg')
+        fs.unlinkSync(`./public/photo/voters/${voterPhotoList[x]}`)
     }
   }
 
@@ -454,12 +499,73 @@ const removeUnusedPhoto = async () => {
     })
 
     if (temp === 0) {
-      fs.unlinkSync(`./public/photo/candidates/${candidatePhotoList[x]}`)
+      if (voterPhotoList[x] !== 'dummy.jpg')
+        fs.unlinkSync(`./public/photo/candidates/${candidatePhotoList[x]}`)
     }
   }
 }
 
 removeUnusedPhoto()
+
+// check if admin has registered to DB
+const getAdmin = async (key, type) => {
+  if (type === 'findbyusername') {
+    return await Admin.findOne({
+      username: key,
+    })
+  } else if (type === 'findbykey') {
+    return await Admin.findOne({
+      key: key,
+    })
+  } else if (type === 'findbyemail') {
+    return await Admin.findOne({
+      email: key,
+    })
+  }
+}
+
+// create admin account
+const createAccount = async (username, email) => {
+  const admin = await getAdmin(username, 'findbyusername')
+  const password = randomstring.generate(8)
+
+  if (admin === null) {
+    Admin.register({ username: username }, password)
+
+    setTimeout(async () => {
+      await Admin.updateOne(
+        {
+          username: username,
+        },
+        {
+          $set: {
+            email: email,
+          },
+        }
+      )
+    }, 500)
+
+    const mailOptions = {
+      from: 'evb-organizer@evb.com',
+      to: email,
+      subject: 'EvB Admin Access',
+      text: `admin password for access : ${password}`,
+    }
+    mailtrap.sendMail(mailOptions)
+  } else {
+    return
+  }
+}
+
+const resetKeyValidation = async (reset_key) => {
+  let account = await getAdmin(reset_key, 'findbykey')
+
+  if (account === null) {
+    account = await getSingleVoter(reset_key, 'findbyresetkey')
+  }
+
+  return account
+}
 
 module.exports = {
   getVoters,
@@ -483,4 +589,7 @@ module.exports = {
   solveComplaint,
   sendResetKey,
   resetPassword,
+  createAccount,
+  getAdmin,
+  resetKeyValidation,
 }

@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './backend/.env' })
+require('dotenv').config({ path: './backend/config/.env' })
 const fs = require('fs')
 const express = require('express')
 const expressLayouts = require('express-ejs-layouts')
@@ -8,24 +8,6 @@ const session = require('express-session')
 const connectEnsureLogin = require('connect-ensure-login')
 const flash = require('connect-flash')
 const readXlsxFile = require('read-excel-file/node')
-const app = express()
-  .set('view engine', 'ejs')
-  .use(express.urlencoded({ extended: false }))
-  .use(expressLayouts)
-  .use(express.static('public'))
-  .use(methodOverride('_method'))
-  .use(
-    session({
-      cookie: { maxAge: 1000 * 60 * 60 },
-      secret: process.env.SESSION_SECRET,
-      resave: true,
-      saveUninitialized: true,
-    })
-  )
-  .use(passport.initialize())
-  .use(passport.session())
-  .use(flash())
-
 const { voterUpload, voterFileUpload, candidateUpload } = require('./multer')
 const {
   getVoters,
@@ -48,7 +30,9 @@ const {
   getComplaints,
   solveComplaint,
   sendResetKey,
-  resetPassword
+  resetPassword,
+  createAccount,
+  resetKeyValidation
 } = require('./db')
 const {
   voterValidation,
@@ -59,6 +43,23 @@ const voterPhoto = voterUpload.single('voterPhotoUpload')
 const candidatePhoto = candidateUpload.single('candidatePhotoUpload')
 const voterFile = voterFileUpload.single('voterFile')
 const Admin = require('./model/admin')
+const app = express()
+  .set('view engine', 'ejs')
+  .use(express.urlencoded({ extended: false }))
+  .use(expressLayouts)
+  .use(express.static('public'))
+  .use(methodOverride('_method'))
+  .use(
+    session({
+      cookie: { maxAge: 1000 * 60 * 60 },
+      secret: process.env.SESSION_SECRET,
+      resave: true,
+      saveUninitialized: true,
+    })
+  )
+  .use(passport.initialize())
+  .use(passport.session())
+  .use(flash())
 
 passport.use(Admin.createStrategy())
 passport.serializeUser(Admin.serializeUser())
@@ -69,7 +70,7 @@ app.get('/register', (req, res) => {
   const flashMessage = req.flash('message')
   res.render('auth/register', {
     layout: 'layouts/auth-layout',
-    title: 'register',
+    title: 'Voter Registration',
     error: flashMessage,
   })
 })
@@ -93,6 +94,7 @@ app.post('/register', async (req, res) => {
       res.render('auth/register-2', {
         layout: 'layouts/auth-layout',
         voter,
+        title: 'Voter Registration'
       })
     }
   }
@@ -112,12 +114,12 @@ app.post('/register2', async (req, res) => {
 
 // login page
 app.get('/login', (req, res) => {
-  const errorMessage = req.flash('messageFailure')
-  const successMessage = req.flash('messageSuccess')
+  const errorMessage = req.flash('errorMessage')
+  const successMessage = req.flash('successMessage')
 
   res.render('auth/login', {
     layout: 'layouts/auth-layout',
-    title: 'login',
+    title: 'EvB-Admin Login',
     flashMessage: { errorMessage, successMessage },
   })
 })
@@ -127,7 +129,7 @@ app.post(
   passport.authenticate('local', {
     failureRedirect: '/login',
     failureFlash: {
-      type: 'messageFailure',
+      type: 'errorMessage',
       message: 'wrong username or password!',
     },
     successRedirect: '/voters',
@@ -138,7 +140,7 @@ app.post(
 // logout
 app.get('/logout', (req, res) => {
   req.logout()
-  res.redirect('/')
+  res.redirect('/login')
 })
 
 // root page
@@ -260,7 +262,6 @@ app.get(
     const errorMessage = req.flash('errorMessage')
     const successMessage = req.flash('successMessage')
     const validator = await getValidator()
-
 
     res.render('candidates', {
       layout: 'layouts/main-layout',
@@ -409,13 +410,14 @@ app.get(
     const complaints = await getComplaints(req.query)
     const user = req.user.username
     const successMessage = req.flash('successMessage')
+    const errorMessage = req.flash('errorMessage')
 
     res.render('complaints', {
       layout: 'layouts/main-layout',
       title: 'complaint page',
       complaints,
       user,
-      successMessage,
+      flashMessage: { errorMessage, successMessage },
     })
   }
 )
@@ -435,7 +437,7 @@ app.post(
 )
 // end complaint page
 
-// voter forgot password
+// voter/admin forgot password
 app.get('/forgot-password', (req, res) => {
   const errorMessage = req.flash('errorMessage')
   const successMessage = req.flash('successMessage')
@@ -443,6 +445,7 @@ app.get('/forgot-password', (req, res) => {
   res.render('auth/forgot-password', {
     layout: 'layouts/auth-layout',
     flashMessage: { errorMessage, successMessage },
+    title: 'voter/admin forgot password',
   })
 })
 
@@ -465,15 +468,17 @@ app.get('/reset-password', (req, res) => {
   res.render('auth/reset-password', {
     layout: 'layouts/auth-layout',
     flashMessage: { errorMessage, successMessage },
+    title: 'voter/admin reset password',
   })
 })
 
 app.post('/reset-password', async (req, res) => {
-  const voter = await getSingleVoter(req.body.reset_key, 'findbyresetkey')
-  if (voter !== null) {
+  const account = await resetKeyValidation(req.body.reset_key)
+  if (account !== null) {
     res.render('auth/reset-password-2', {
       layout: 'layouts/auth-layout',
-      voter,
+      title: 'reset password',
+      account,
     })
   } else {
     req.flash('errorMessage', 'invalid reset key code!')
@@ -483,14 +488,28 @@ app.post('/reset-password', async (req, res) => {
 
 app.post('/reset-password-2', async (req, res) => {
   try {
-    const reset = await resetPassword(req.body)
-    req.flash('successMessage', `${req.body.nim} password updated`)
+    await resetPassword(req.body)
+    req.flash('successMessage', `${req.body.email} password updated`)
   } catch (error) {
     req.flash('errorMessage', 'reset password failed!')
   }
-  res.redirect('/reset-password')  
+  res.redirect('/reset-password')
 })
 // end voter forgot password
+
+// admin change password
+app.post('/change-password', async (req, res) => {
+  const admin = await Admin.findByUsername(req.body.username)
+
+  try {
+    await admin.changePassword(req.body.currentPassword, req.body.newPassword)
+    req.flash('successMessage', 'password successfully changed')
+    res.redirect('/logout')
+  } catch (error) {
+    req.flash('errorMessage', 'incorrect current password!')
+    res.redirect('back')
+  }
+})
 
 // page not found
 app.use((req, res) => {
@@ -508,5 +527,7 @@ app.listen(process.env.HTTP_PORT, () => {
   )
 })
 
-// run this for the first time!
-// Admin.register({username: 'admin', active: false}, '123')
+// create admin account for the first time
+;(async () => {
+  createAccount(process.env.USERNAME, process.env.EMAIL)
+})()
