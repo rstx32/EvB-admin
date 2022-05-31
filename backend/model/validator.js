@@ -6,10 +6,12 @@ const validatorSchema = new mongoose.Schema({
     type: String,
     unique: true,
   },
-  password: {
+  password: String,
+  email: String,
+  token: {
     type: String,
+    default: null,
   },
-  token: String,
   voter: {
     status: {
       type: String,
