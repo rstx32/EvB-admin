@@ -109,7 +109,11 @@
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#changePassword">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Change Password
+                                </a>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logout">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>
@@ -149,7 +153,7 @@
     <!-- End of Page Wrapper -->
 
     <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    <div class="modal fade" id="logout" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -167,10 +171,89 @@
             </div>
         </div>
     </div>
+    <!-- End Logout Modal-->
+    
+    <!-- Change Password Modal-->
+    <div class="modal fade" id="changePassword" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- form -->
+                <form method="post" action="/change-password">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Change Password</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- admin username -->
+                        <input type="hidden" name="username" value="<%= user %>">
+
+                        <!-- current password -->
+                        <div class="form-floating mb-3">
+                            <input type="password" name="currentPassword" class="form-control inputan-password" id="currentPassword" placeholder="current password">
+                            <label for="currentPassword">Current Password</label>
+                        </div>
+                        
+                        <!-- new password -->
+                        <div class="form-floating mb-3">
+                            <input type="password" name="newPassword" class="form-control inputan-password" id="newPassword" placeholder="new password">
+                            <label for="newPassword">New Password</label>
+                        </div>
+                        
+                        <!-- confirm new password -->
+                        <div class="form-floating mb-3">
+                            <input type="password" name="confirmNewPassword" class="form-control inputan-password" id="confirmNewPassword" placeholder="confirm new password">
+                            <label for="confirmNewPassword">Confirm New Password</label>
+                        </div>
+
+                        <!-- show/hide password -->
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="showPassword" id="showPassword" onclick="showPasswordForm()">
+                            <label class="form-check-label" for="showPassword">
+                              Show Password
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        <!-- submit -->
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+
+                </form>
+                <!-- end form -->
+                
+            </div>
+        </div>
+    </div>
+    <!-- End Change Password Modal-->
 
     <!-- Bootstrap core JavaScript-->
     <script src="http://localhost:<%= process.env.HTTP_PORT %>/assets/jquery/jquery.min.js"></script>
     <script src="http://localhost:<%= process.env.HTTP_PORT %>/assets/bootstrap/bootstrap.bundle.min.js"></script>
+    <script>
+        function showPasswordForm () {
+            var showPasswordButton = document.getElementsByClassName('inputan-password')
+
+            if (showPasswordButton[0].type==='password' &&
+                showPasswordButton[1].type==='password' &&
+                showPasswordButton[2].type==='password'
+            ) {
+                showPasswordButton[0].type = 'text'
+                showPasswordButton[1].type = 'text'
+                showPasswordButton[2].type = 'text'
+            } else {
+                showPasswordButton[0].type = 'password'
+                showPasswordButton[1].type = 'password'
+                showPasswordButton[2].type = 'password'
+            }
+        }
+    </script>
 
 </body>
 

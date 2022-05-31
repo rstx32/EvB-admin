@@ -78,9 +78,8 @@
     var id = document.getElementById("id").value
     var pubKey = document.getElementById("public_key")
 
-    if(document.getElementById("password").value===""){
-        document.getElementById("passwordLength").style.display = "none";
-    }
+    document.getElementById("passwordLength").style.display = "none";
+    document.getElementById("passwordMatch").style.display = "none";
 
     // check password and confirmation password
     function checkMatch() {
@@ -134,7 +133,7 @@
         const pemExported = `-----BEGIN PUBLIC KEY-----\n${exportedAsBase64}\n-----END PUBLIC KEY-----`
 
         pubKey.value = pemExported;
-        await downloadProcess(id, pemExported, 'public_key')
+        // await downloadProcess(id, pemExported, 'public_key')
         // post data form to server
         form.submit();
     }

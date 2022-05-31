@@ -4,7 +4,7 @@
 
 <!-- error flash -->
 <% if (flashMessage.errorMessage.length > 0) { %>
-    <% if (flashMessage.errorMessage[0] === 'invalid photo file!') { %>
+    <% if (flashMessage.errorMessage.length === 1) { %>
     <div class="card mb-4 py-3 border-left-danger">
         <div class="card-body">
             <code>
