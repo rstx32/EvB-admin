@@ -27,12 +27,13 @@ const {
   tokenValidation,
   isAdminAllowed,
   receiveComplaint,
+  isComplaintExist,
   getComplaints,
   solveComplaint,
   sendResetKey,
   resetPassword,
   createAccount,
-  resetKeyValidation
+  resetKeyValidation,
 } = require('./db')
 const {
   voterValidation,
@@ -94,7 +95,7 @@ app.post('/register', async (req, res) => {
       res.render('auth/register-2', {
         layout: 'layouts/auth-layout',
         voter,
-        title: 'Voter Registration'
+        title: 'Voter Registration',
       })
     }
   }
@@ -385,20 +386,27 @@ app.get('/public', async (req, res) => {
 })
 
 app.post('/public', async (req, res) => {
-  try {
-    await receiveComplaint(req.body)
-    req.flash(
-      'successMessage',
-      `complaint ${req.body.email} sent, please wait for fixes`
-    )
+  const checkComplaint = await isComplaintExist(req.body.email)
+  console.log(checkComplaint)
+  if (checkComplaint.status === 'unsolved') {
+    req.flash('errorMessage', 'your complaint is still solving!')
     res.redirect('/public')
-  } catch (error) {
-    const errorMessage = [
-      error.errors.email.message,
-      error.errors.comment.message,
-    ]
-    req.flash('errorMessage', errorMessage)
-    res.redirect('/public')
+  } else {
+    try {
+      await receiveComplaint(req.body)
+      req.flash(
+        'successMessage',
+        `complaint ${req.body.email} sent, please wait for fixes`
+      )
+      res.redirect('/public')
+    } catch (error) {
+      const errorMessage = [
+        error.errors.email.message,
+        error.errors.comment.message,
+      ]
+      req.flash('errorMessage', errorMessage)
+      res.redirect('/public')
+    }
   }
 })
 

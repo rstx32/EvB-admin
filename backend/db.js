@@ -309,6 +309,11 @@ const isAdminAllowed = async (req, res, next) => {
   }
 }
 
+// check if public email has complaint before
+const isComplaintExist = async (data) => {
+  return await Complaint.findOne({email: data})
+}
+
 // receive complaint from public
 const receiveComplaint = async (data) => {
   return await Complaint.create({
@@ -585,6 +590,7 @@ module.exports = {
   tokenValidation,
   isAdminAllowed,
   receiveComplaint,
+  isComplaintExist,
   getComplaints,
   solveComplaint,
   sendResetKey,
