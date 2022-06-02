@@ -57,6 +57,23 @@
         </div>
     </div>
     <!-- end card voter count -->
+    
+    <!-- card total page -->
+    <div class="col-xl-2 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Pages
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800"><%= voters.totalPages %></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end card total page -->
 
     <!-- card add voter -->
     <div class="col-lg-2 col-md-9 mb-4">
@@ -186,7 +203,7 @@
         <div class="card shadow mb-4">
             <!-- card header -->
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">List of All Voters</h6>
+                <h6 class="m-0 font-weight-bold text-primary">List of All Voters (page <%= voters.page %>)</h6>
             </div>
             <!-- card header -->
 
@@ -197,7 +214,7 @@
                     <div class="col-sm-2">
                         <div class="col mb-3">
                             <select class="form-select" id="displayItem" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
-                                <% for( let index = 1; index <= 10; index++ ) { %>
+                                <% for( let index = 0; index <= 100; index+=25 ) { %>
                                     <% if (index === voters.limit) { %>
                                         <option value="voters?page=1&limit=<%= index %>" selected><%= index %></option>
                                     <% } else{ %>
@@ -396,6 +413,7 @@
 
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-center">
+                      <!-- previous page button -->
                       <% if (voters.hasPrevPage) { %>
                         <li class="page-item">
                             <a class="page-link" href="/voters?page=<%= voters.page-1 %>&limit=<%= voters.limit %>">
@@ -409,19 +427,36 @@
                             </a>
                         </li>
                       <% } %> 
+                      <!-- end previous page button -->
+                      
+                      <!-- pagination logic -->
+                      <% let modulo = voters.page%10 %>
+                      <% if (modulo===0) { %>
+                        <% modulo = 10 %> 
+                      <% } %>
+                      <% let startPage = (voters.page-modulo)+1 %>
+                      <% let endPage = startPage+9 %>
 
-                      <% for( let index = 1; index <= voters.totalPages; index++ ) { %>
+                      <% if (endPage>=voters.totalPages) { %>
+                        <% endPage = voters.totalPages %> 
+                      <% } %>
+                      <!-- end pagination logic -->
+
+                      <!-- page selector -->
+                      <% for( let index = startPage; index <= endPage; index++ ) { %>
                         <% if (voters.page === index) { %>
                             <li class="page-item active">
                                 <a class="page-link" href="/voters?page=<%= index %>&limit=<%= voters.limit %>"><%= index %></a>
                             </li>
-                        <% } else {%>
+                        <% } else { %>
                             <li class="page-item">
                                 <a class="page-link" href="/voters?page=<%= index %>&limit=<%= voters.limit %>"><%= index %></a>
                             </li>
                         <% } %> 
                       <% } %>
+                      <!-- end page selector -->
 
+                      <!-- next page button -->
                       <% if (voters.hasNextPage) { %>
                         <li class="page-item">
                             <a class="page-link" href="/voters?page=<%= voters.page+1 %>&limit=<%= voters.limit %>">
@@ -435,6 +470,7 @@
                             </a>
                         </li>
                       <% } %> 
+                      <!-- end next page button -->
                     </ul>
                 </nav>
 
