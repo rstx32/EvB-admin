@@ -529,7 +529,7 @@ app.use((req, res) => {
 })
 
 // listen on defined port
-app.listen(process.env.HTTP_PORT, () => {
+app.listen(process.env.HTTP_PORT || 80, () => {
   console.log(
     `EvB Admin listening on port http://localhost:${process.env.HTTP_PORT}/`
   )
