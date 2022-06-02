@@ -83,6 +83,7 @@
 
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-center">
+                      <!-- previous page button -->
                       <% if (complaints.hasPrevPage) { %>
                         <li class="page-item">
                             <a class="page-link" href="/complaints?page=<%= complaints.page-1 %>&limit=<%= complaints.limit %>">
@@ -96,8 +97,23 @@
                             </a>
                         </li>
                       <% } %> 
+                      <!-- end previous page button -->
 
-                      <% for( let index = 1; index <= complaints.totalPages; index++ ) { %>
+                      <!-- pagination logic -->
+                      <% let modulo = complaints.page%10 %>
+                      <% if (modulo===0) { %>
+                        <% modulo = 10 %> 
+                      <% } %>
+                      <% let startPage = (complaints.page-modulo)+1 %>
+                      <% let endPage = startPage+9 %>
+
+                      <% if (endPage>=complaints.totalPages) { %>
+                        <% endPage = complaints.totalPages %> 
+                      <% } %>
+                      <!-- end pagination logic -->
+
+                      <!-- page selector -->
+                      <% for( let index = startPage; index <= endPage; index++ ) { %>
                         <% if (complaints.page === index) { %>
                             <li class="page-item active">
                                 <a class="page-link" href="/complaints?page=<%= index %>&limit=<%= complaints.limit %>"><%= index %></a>
@@ -108,7 +124,9 @@
                             </li>
                         <% } %> 
                       <% } %>
+                      <!-- end page selector -->
 
+                      <!-- next page button -->
                       <% if (complaints.hasNextPage) { %>
                         <li class="page-item">
                             <a class="page-link" href="/complaints?page=<%= complaints.page+1 %>&limit=<%= complaints.limit %>">
@@ -122,6 +140,7 @@
                             </a>
                         </li>
                       <% } %> 
+                      <!-- end next page button -->
                     </ul>
                 </nav>
 
