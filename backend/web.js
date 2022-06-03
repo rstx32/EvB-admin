@@ -144,11 +144,11 @@ app.get('/logout', (req, res) => {
   res.redirect('/login')
 })
 
-// root page
+// homepage
 app.get('/', (req, res) => {
   res.render('root', {
     layout: 'layouts/public-layout',
-    title: 'Homepage',
+    title: 'Homepage EvB-admin',
   })
 })
 

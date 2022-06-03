@@ -89,45 +89,64 @@
 
                     <nav aria-label="Page navigation example">
                         <ul class="pagination justify-content-center">
-                        <% if (voters.hasPrevPage) { %>
+                          <!-- previous page button -->
+                          <% if (voters.hasPrevPage) { %>
                             <li class="page-item">
-                                <a class="page-link" href="/public?page=<%= voters.page-1 %>&limit=<%= voters.limit %>">
+                                <a class="page-link" href="/voters?page=<%= voters.page-1 %>&limit=<%= voters.limit %>">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
-                        <% } else { %>      
+                          <% } else { %>      
                             <li class="page-item disabled">
                                 <a class="page-link" href="#">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
-                        <% } %> 
-
-                        <% for( let index = 1; index <= voters.totalPages; index++ ) { %>
+                          <% } %> 
+                          <!-- end previous page button -->
+                          
+                          <!-- pagination logic -->
+                          <% let modulo = voters.page%10 %>
+                          <% if (modulo===0) { %>
+                            <% modulo = 10 %> 
+                          <% } %>
+                          <% let startPage = (voters.page-modulo)+1 %>
+                          <% let endPage = startPage+9 %>
+    
+                          <% if (endPage>=voters.totalPages) { %>
+                            <% endPage = voters.totalPages %> 
+                          <% } %>
+                          <!-- end pagination logic -->
+    
+                          <!-- page selector -->
+                          <% for( let index = startPage; index <= endPage; index++ ) { %>
                             <% if (voters.page === index) { %>
                                 <li class="page-item active">
-                                    <a class="page-link" href="/public?page=<%= index %>&limit=<%= voters.limit %>"><%= index %></a>
+                                    <a class="page-link" href="/voters?page=<%= index %>&limit=<%= voters.limit %>"><%= index %></a>
                                 </li>
-                            <% } else {%>
+                            <% } else { %>
                                 <li class="page-item">
-                                    <a class="page-link" href="/public?page=<%= index %>&limit=<%= voters.limit %>"><%= index %></a>
+                                    <a class="page-link" href="/voters?page=<%= index %>&limit=<%= voters.limit %>"><%= index %></a>
                                 </li>
                             <% } %> 
-                        <% } %>
-
-                        <% if (voters.hasNextPage) { %>
+                          <% } %>
+                          <!-- end page selector -->
+    
+                          <!-- next page button -->
+                          <% if (voters.hasNextPage) { %>
                             <li class="page-item">
-                                <a class="page-link" href="/public?page=<%= voters.page+1 %>&limit=<%= voters.limit %>">
+                                <a class="page-link" href="/voters?page=<%= voters.page+1 %>&limit=<%= voters.limit %>">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
-                        <% } else { %>      
+                          <% } else { %>      
                             <li class="page-item disabled">
                                 <a class="page-link" href="#">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
-                        <% } %> 
+                          <% } %> 
+                          <!-- end next page button -->
                         </ul>
                     </nav>
 
