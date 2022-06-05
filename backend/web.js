@@ -387,9 +387,9 @@ app.get('/public', async (req, res) => {
 
 app.post('/public', async (req, res) => {
   const checkComplaint = await isComplaintExist(req.body.email)
-  console.log(checkComplaint)
-  if (checkComplaint.status === 'unsolved') {
-    req.flash('errorMessage', 'your complaint is still solving!')
+
+  if (checkComplaint !== null) {
+    req.flash('errorMessage', 'you are already complained before!')
     res.redirect('/public')
   } else {
     try {
