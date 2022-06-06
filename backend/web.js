@@ -141,6 +141,7 @@ app.post(
 // logout
 app.get('/logout', (req, res) => {
   req.logout()
+  req.flash('successMessage', 'logged out')
   res.redirect('/login')
 })
 
@@ -314,11 +315,11 @@ app.delete(
     if (req.params.type === 'voters') {
       deleteVoter(req.body.email)
       req.flash('successMessage', `${req.body.email} deleted`)
-      res.redirect('/voters')
+      res.redirect('back')
     } else if (req.params.type === 'candidates') {
       deleteCandidate(req.body.id)
       req.flash('successMessage', `candidate deleted`)
-      res.redirect('/candidates')
+      res.redirect('back')
     } else {
       next()
     }
