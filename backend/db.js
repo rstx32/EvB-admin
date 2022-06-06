@@ -510,7 +510,7 @@ const removeUnusedPhoto = async () => {
   }
 }
 
-removeUnusedPhoto()
+// removeUnusedPhoto()
 
 // check if admin has registered to DB
 const getAdmin = async (key, type) => {
