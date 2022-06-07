@@ -86,7 +86,7 @@ const addVoter = async (newVoter, newPhoto) => {
       'key.registration': randomKey,
     })
   } catch (error) {
-    return new Error('error bro!')
+    return error
   }
 }
 
