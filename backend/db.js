@@ -598,4 +598,5 @@ module.exports = {
   createAccount,
   getAdmin,
   resetKeyValidation,
+  removeUnusedPhoto,
 }

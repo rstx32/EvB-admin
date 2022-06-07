@@ -34,6 +34,7 @@ const {
   resetPassword,
   createAccount,
   resetKeyValidation,
+  removeUnusedPhoto
 } = require('./db')
 const { voterValidation, candidateValidation, voterValidate } = require('./validation')
 const voterPhoto = voterUpload.single('voterPhotoUpload')
@@ -500,5 +501,6 @@ app.listen(process.env.HTTP_PORT, () => {
 
 // create admin account for the first time
 ;(async () => {
+  removeUnusedPhoto()
   createAccount(process.env.USERNAME, process.env.EMAIL)
 })()
