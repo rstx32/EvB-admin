@@ -1,8 +1,7 @@
-.env
+backend/config/.env
 node_modules
 .vscode
 .dockerignore
 Dockerfile
 public/photo/candidates
 public/photo/voters
-.vscode/launch.json
