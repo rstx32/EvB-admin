@@ -84,18 +84,37 @@
     </div>
     <!-- end card add voter -->
 
-    <!-- card add voter -->
+    <!-- card add voter XLSX -->
     <div class="col-lg-2 col-md-9 mb-4">
         <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
-                <!-- modal button add voter -->
+                <!-- modal button add voter XLSX -->
                 <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importVoter">
                     <i class="bi bi-cloud-upload"> Import Voter XLSX</i>
                 </button>
             </div>
         </div>
     </div>
-    <!-- end card add voter -->
+    <!-- end card add voter XLSX -->
+    
+    <% if (adminStatus==='deny') { %>
+        <!-- card admin locked -->
+        <div class="col-lg-2 col-md-9 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Data Locked
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">Voters data has been locked</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end card admin locked -->
+    <% } %>
 
 </div>
 
