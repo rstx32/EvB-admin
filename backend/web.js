@@ -35,11 +35,7 @@ const {
   createAccount,
   resetKeyValidation,
 } = require('./db')
-const {
-  voterValidation,
-  candidateValidation,
-  voterValidate,
-} = require('./validation')
+const { voterValidation, candidateValidation, voterValidate } = require('./validation')
 const voterPhoto = voterUpload.single('voterPhotoUpload')
 const candidatePhoto = candidateUpload.single('candidatePhotoUpload')
 const voterFile = voterFileUpload.single('voterFile')
@@ -68,11 +64,13 @@ passport.deserializeUser(Admin.deserializeUser())
 
 // register page
 app.get('/register', (req, res) => {
-  const flashMessage = req.flash('message')
+  const successMessage = req.flash('successMessage')
+  const errorMessage = req.flash('errorMessage')
+
   res.render('auth/register', {
     layout: 'layouts/auth-layout',
     title: 'Voter Registration',
-    error: flashMessage,
+    flashMessage: { successMessage, errorMessage },
   })
 })
 
@@ -105,10 +103,10 @@ app.post('/register2', async (req, res) => {
   const isSucced = await addPubKey(req.body)
 
   if (isSucced) {
-    req.flash('message', `registration complete!`)
+    req.flash('successMessage', `registration complete!`)
     res.redirect('register')
   } else {
-    req.flash('message', `voter has been registered!`)
+    req.flash('errorMessage', `voter has been registered!`)
     res.redirect('register')
   }
 })
@@ -161,6 +159,7 @@ app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
   const successMessage = req.flash('successMessage')
   const user = req.user.username
   const validator = await getValidator()
+  const admin = await Admin.findOne({ username: 'admin' })
 
   res.render('voters', {
     layout: 'layouts/main-layout',
@@ -169,162 +168,141 @@ app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
     user,
     flashMessage: { errorMessage, successMessage },
     validator,
+    adminStatus: admin.voterAccess,
   })
 })
 
 // add voters
-app.post(
-  '/voters',
-  connectEnsureLogin.ensureLoggedIn(),
-  isAdminAllowed,
-  (req, res) => {
-    voterPhoto(req, res, (err) => {
-      if (err) {
-        req.flash('errorMessage', 'invalid photo file!')
+// check if admin allow to CRUD
+// check if photo is valid
+// check if voter is exist
+app.post('/voters', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res) => {
+  voterPhoto(req, res, async (err) => {
+    if (err) {
+      req.flash('errorMessage', 'invalid photo file!')
+      res.redirect('/voters')
+    } else {
+      const { error, value } = voterValidation(req.body)
+
+      if (error) {
+        req.flash('errorMessage', error.details)
         res.redirect('/voters')
       } else {
-        const { error, value } = voterValidation(req.body)
-        if (error) {
-          req.flash('errorMessage', error.details)
-          res.redirect('/voters')
+        const isVoterExist = await getSingleVoter(value.nim, 'findbynim')
+        
+		if (isVoterExist) {
+          req.flash('errorMessage', 'voter is exist!')
         } else {
           addVoter(value, req.file)
-          req.flash('successMessage', `success add new voter : ${value.email}`)
-          res.redirect('/voters')
-        }
+		  req.flash('successMessage', `success add new voter : ${value.email}`)	
+		}
+        res.redirect('/voters')
       }
-    })
-  }
-)
+    }
+  })
+})
 
 // voters xlsx file upload
-app.post(
-  '/voters-file',
-  connectEnsureLogin.ensureLoggedIn(),
-  isAdminAllowed,
-  (req, res) => {
-    voterFile(req, res, (err) => {
-      if (err) {
-        req.flash('errorMessage', 'invalid spreadsheet file!')
-        res.redirect('/voters')
-      } else {
-        readXlsxFile('backend/voterFile.xlsx').then((rows) => {
-          for (x = 1; x < rows.length; x++) {
-            const temp = {
-              nim: rows[x][0],
-              fullname: rows[x][1],
-              email: rows[x][2],
-            }
-
-            addVoter(temp)
+app.post('/voters-file', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res) => {
+  voterFile(req, res, (err) => {
+    if (err) {
+      req.flash('errorMessage', 'invalid spreadsheet file!')
+      res.redirect('/voters')
+    } else {
+      readXlsxFile('backend/voterFile.xlsx').then((rows) => {
+        for (x = 1; x < rows.length; x++) {
+          const temp = {
+            nim: rows[x][0],
+            fullname: rows[x][1],
+            email: rows[x][2],
           }
-          fs.unlinkSync('backend/voterFile.xlsx')
-          req.flash('successMessage', `success import voters`)
-          res.redirect('/voters')
-        })
-      }
-    })
-  }
-)
+
+          addVoter(temp)
+        }
+        fs.unlinkSync('backend/voterFile.xlsx')
+        req.flash('successMessage', `success import voters`)
+        res.redirect('/voters')
+      })
+    }
+  })
+})
 
 // edit voters
-app.put(
-  '/voters',
-  connectEnsureLogin.ensureLoggedIn(),
-  isAdminAllowed,
-  (req, res) => {
-    voterPhoto(req, res, (err) => {
-      if (err) {
-        req.flash('errorMessage', 'invalid photo file!')
+app.put('/voters', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res) => {
+  voterPhoto(req, res, (err) => {
+    if (err) {
+      req.flash('errorMessage', 'invalid photo file!')
+      res.redirect('/voters')
+    } else {
+      const { error, value } = voterValidation(req.body)
+      if (error) {
+        req.flash('errorMessage', error.details)
         res.redirect('/voters')
       } else {
-        const { error, value } = voterValidation(req.body)
-        if (error) {
-          req.flash('errorMessage', error.details)
-          res.redirect('/voters')
-        } else {
-          editVoter(value, req.file)
-          req.flash('successMessage', `success edit voter : ${value.email}`)
-          res.redirect('/voters')
-        }
+        editVoter(value, req.file)
+        req.flash('successMessage', `success edit voter : ${value.email}`)
+        res.redirect('/voters')
       }
-    })
-  }
-)
+    }
+  })
+})
 /////////////////////////////////////// end of voters ////////////////////////////////////////
 
 //////////////////////////////////////// /// candidates ///////////////////////////////////////////
 // get all candidates
-app.get(
-  '/candidates',
-  connectEnsureLogin.ensureLoggedIn(),
-  async (req, res) => {
-    const candidate = await getCandidates()
-    const user = req.user.username
-    const errorMessage = req.flash('errorMessage')
-    const successMessage = req.flash('successMessage')
-    const validator = await getValidator()
+app.get('/candidates', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  const candidate = await getCandidates()
+  const user = req.user.username
+  const errorMessage = req.flash('errorMessage')
+  const successMessage = req.flash('successMessage')
+  const validator = await getValidator()
 
-    res.render('candidates', {
-      layout: 'layouts/main-layout',
-      title: 'candidates',
-      user,
-      candidate,
-      flashMessage: { errorMessage, successMessage },
-      validator,
-    })
-  }
-)
+  res.render('candidates', {
+    layout: 'layouts/main-layout',
+    title: 'candidates',
+    user,
+    candidate,
+    flashMessage: { errorMessage, successMessage },
+    validator,
+  })
+})
 
 // add candidates
-app.post(
-  '/candidates',
-  connectEnsureLogin.ensureLoggedIn(),
-  isAdminAllowed,
-  async (req, res) => {
-    // multer upload file foto
-    candidatePhoto(req, res, (err) => {
-      if (err) {
-        req.flash('message', 'invalid photo file!')
+app.post('/candidates', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, async (req, res) => {
+  // multer upload file foto
+  candidatePhoto(req, res, (err) => {
+    if (err) {
+      req.flash('message', 'invalid photo file!')
+      res.redirect('/candidates')
+    } else {
+      const { error, value } = candidateValidation(req.body)
+      if (error) {
+        req.flash('errorMessage', error.details)
         res.redirect('/candidates')
       } else {
-        const { error, value } = candidateValidation(req.body)
-        if (error) {
-          req.flash('errorMessage', error.details)
-          res.redirect('/candidates')
-        } else {
-          req.flash(
-            'successMessage',
-            `success add new candidate : ${value.candidate}`
-          )
-          addCandidate(value, req.file)
-          res.redirect('/candidates')
-        }
+        req.flash('successMessage', `success add new candidate : ${value.candidate}`)
+        addCandidate(value, req.file)
+        res.redirect('/candidates')
       }
-    })
-  }
-)
+    }
+  })
+})
 /////////////////////////////////////// end of candidates ////////////////////////////////////////
 
 // delete data
-app.delete(
-  '/:type',
-  connectEnsureLogin.ensureLoggedIn(),
-  isAdminAllowed,
-  (req, res, next) => {
-    if (req.params.type === 'voters') {
-      deleteVoter(req.body.email)
-      req.flash('successMessage', `${req.body.email} deleted`)
-      res.redirect('back')
-    } else if (req.params.type === 'candidates') {
-      deleteCandidate(req.body.id)
-      req.flash('successMessage', `candidate deleted`)
-      res.redirect('back')
-    } else {
-      next()
-    }
+app.delete('/:type', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res, next) => {
+  if (req.params.type === 'voters') {
+    deleteVoter(req.body.email)
+    req.flash('successMessage', `${req.body.email} deleted`)
+    res.redirect('back')
+  } else if (req.params.type === 'candidates') {
+    deleteCandidate(req.body.id)
+    req.flash('successMessage', `candidate deleted`)
+    res.redirect('back')
+  } else {
+    next()
   }
-)
+})
 
 /////////////////// export API ///////////////////
 // export data voter/candidate to validator
@@ -395,16 +373,10 @@ app.post('/public', async (req, res) => {
   } else {
     try {
       await receiveComplaint(req.body)
-      req.flash(
-        'successMessage',
-        `complaint ${req.body.email} sent, please wait for fixes`
-      )
+      req.flash('successMessage', `complaint ${req.body.email} sent, please wait for fixes`)
       res.redirect('/public')
     } catch (error) {
-      const errorMessage = [
-        error.errors.email.message,
-        error.errors.comment.message,
-      ]
+      const errorMessage = [error.errors.email.message, error.errors.comment.message]
       req.flash('errorMessage', errorMessage)
       res.redirect('/public')
     }
@@ -412,38 +384,30 @@ app.post('/public', async (req, res) => {
 })
 
 // complaint page
-app.get(
-  '/complaints',
-  connectEnsureLogin.ensureLoggedIn(),
-  async (req, res) => {
-    const complaints = await getComplaints(req.query)
-    const user = req.user.username
-    const successMessage = req.flash('successMessage')
-    const errorMessage = req.flash('errorMessage')
+app.get('/complaints', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  const complaints = await getComplaints(req.query)
+  const user = req.user.username
+  const successMessage = req.flash('successMessage')
+  const errorMessage = req.flash('errorMessage')
 
-    res.render('complaints', {
-      layout: 'layouts/main-layout',
-      title: 'complaint page',
-      complaints,
-      user,
-      flashMessage: { errorMessage, successMessage },
-    })
-  }
-)
+  res.render('complaints', {
+    layout: 'layouts/main-layout',
+    title: 'complaint page',
+    complaints,
+    user,
+    flashMessage: { errorMessage, successMessage },
+  })
+})
 
-app.post(
-  '/complaints',
-  connectEnsureLogin.ensureLoggedIn(),
-  async (req, res) => {
-    try {
-      await solveComplaint(req.body)
-      req.flash('successMessage', `complaint ${req.body.email} solved`)
-      res.redirect('/complaints')
-    } catch (error) {
-      res.send(error)
-    }
+app.post('/complaints', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+  try {
+    await solveComplaint(req.body)
+    req.flash('successMessage', `complaint ${req.body.email} solved`)
+    res.redirect('/complaints')
+  } catch (error) {
+    res.send(error)
   }
-)
+})
 // end complaint page
 
 // voter/admin forgot password
@@ -531,9 +495,7 @@ app.use((req, res) => {
 
 // listen on defined port
 app.listen(process.env.HTTP_PORT, () => {
-  console.log(
-    `EvB Admin listening on port http://localhost:${process.env.HTTP_PORT}/`
-  )
+  console.log(`EvB Admin listening on port http://localhost:${process.env.HTTP_PORT}/`)
 })
 
 // create admin account for the first time
