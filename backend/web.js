@@ -258,6 +258,7 @@ app.get('/candidates', connectEnsureLogin.ensureLoggedIn(), async (req, res) => 
   const errorMessage = req.flash('errorMessage')
   const successMessage = req.flash('successMessage')
   const validator = await getValidator()
+  const admin = await Admin.findOne({ username: 'admin' })
 
   res.render('candidates', {
     layout: 'layouts/main-layout',
@@ -266,6 +267,7 @@ app.get('/candidates', connectEnsureLogin.ensureLoggedIn(), async (req, res) => 
     candidate,
     flashMessage: { errorMessage, successMessage },
     validator,
+    adminStatus: admin.candidateAccess,
   })
 })
 
