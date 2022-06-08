@@ -34,7 +34,8 @@ const {
   resetPassword,
   createAccount,
   resetKeyValidation,
-  removeUnusedPhoto
+  removeUnusedPhoto,
+  isComplaintAllowed
 } = require('./db')
 const { voterValidation, candidateValidation, voterValidate } = require('./validation')
 const voterPhoto = voterUpload.single('voterPhotoUpload')
@@ -365,7 +366,7 @@ app.get('/public', async (req, res) => {
   })
 })
 
-app.post('/public', async (req, res) => {
+app.post('/public', isComplaintAllowed, async (req, res) => {
   const checkComplaint = await isComplaintExist(req.body.email)
 
   if (checkComplaint !== null) {
@@ -500,6 +501,7 @@ app.listen(process.env.HTTP_PORT, () => {
 })
 
 // create admin account for the first time
+// delete unused photo
 ;(async () => {
   removeUnusedPhoto()
   createAccount(process.env.USERNAME, process.env.EMAIL)

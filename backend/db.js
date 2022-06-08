@@ -39,10 +39,7 @@ const getVoters = async (query) => {
     )
   } else {
     const match = query.fullname.toUpperCase()
-    return await Voter.paginate(
-      { fullname: { $regex: match } },
-      { pagination: false }
-    )
+    return await Voter.paginate({ fullname: { $regex: match } }, { pagination: false })
   }
 }
 
@@ -311,7 +308,7 @@ const isAdminAllowed = async (req, res, next) => {
 
 // check if public email has complaint before
 const isComplaintExist = async (data) => {
-  return await Complaint.findOne({email: data})
+  return await Complaint.findOne({ email: data })
 }
 
 // receive complaint from public
@@ -572,6 +569,22 @@ const resetKeyValidation = async (reset_key) => {
   return account
 }
 
+// is public allowed to sent POST complaint?
+// allowed if validator still not solve
+const isComplaintAllowed = async (req, res, next) => {
+  const validators = await Validator.find({
+    'voter.solve': '-',
+  })
+  const allValidators = await getValidator()
+
+  if (validators.length !== allValidators.length) {
+    req.flash('errorMessage', 'complaint is not allowed anymore!')
+    return res.redirect('back')
+  } else {
+    return next()
+  }
+}
+
 module.exports = {
   getVoters,
   getSingleVoter,
@@ -599,4 +612,5 @@ module.exports = {
   getAdmin,
   resetKeyValidation,
   removeUnusedPhoto,
+  isComplaintAllowed
 }
