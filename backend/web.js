@@ -1,15 +1,15 @@
-require('dotenv').config({ path: './backend/config/.env' })
-const fs = require('fs')
-const express = require('express')
-const expressLayouts = require('express-ejs-layouts')
-const methodOverride = require('method-override')
-const passport = require('passport')
-const session = require('express-session')
-const connectEnsureLogin = require('connect-ensure-login')
-const flash = require('connect-flash')
-const readXlsxFile = require('read-excel-file/node')
-const { voterUpload, voterFileUpload, candidateUpload } = require('./multer')
-const {
+import dotenv from 'dotenv'
+import { unlinkSync } from 'fs'
+import express from 'express'
+import expressLayouts from 'express-ejs-layouts'
+import methodOverride from 'method-override'
+import passport from 'passport'
+import session from 'express-session'
+import { ensureLoggedIn } from 'connect-ensure-login'
+import flash from 'connect-flash'
+import readXlsxFile from 'read-excel-file'
+import { voterUpload, voterFileUpload, candidateUpload } from './multer.js'
+import {
   getVoters,
   addVoter,
   getSingleVoter,
@@ -37,12 +37,14 @@ const {
   removeUnusedPhoto,
   isComplaintAllowed,
   getSingleCandidate,
-} = require('./db')
-const { voterValidation, candidateValidation, voterValidate } = require('./validation')
+} from './db.js'
+import { voterValidation, candidateValidation, voterValidate } from './validation.js'
+import Admin from './model/admin.js'
+
+dotenv.config({ path: 'backend/config/.env' })
 const voterPhoto = voterUpload.single('voterPhotoUpload')
 const candidatePhoto = candidateUpload.single('candidatePhotoUpload')
 const voterFile = voterFileUpload.single('voterFile')
-const Admin = require('./model/admin')
 const app = express()
   .set('view engine', 'ejs')
   .use(express.urlencoded({ extended: false }))
@@ -155,7 +157,7 @@ app.get('/', (req, res) => {
 
 /////////////////////////////////////////// voters ///////////////////////////////////////////
 // get all voters
-app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+app.get('/voters', ensureLoggedIn(), async (req, res) => {
   const voters = await getVoters(req.query)
   const errorMessage = req.flash('errorMessage')
   const successMessage = req.flash('successMessage')
@@ -178,7 +180,7 @@ app.get('/voters', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
 // check if admin allow to CRUD
 // check if photo is valid
 // check if voter is exist
-app.post('/voters', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res) => {
+app.post('/voters', ensureLoggedIn(), isAdminAllowed, (req, res) => {
   voterPhoto(req, res, async (err) => {
     if (err) {
       req.flash('errorMessage', 'invalid photo file!')
@@ -205,7 +207,7 @@ app.post('/voters', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, r
 })
 
 // voters xlsx file upload
-app.post('/voters-file', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res) => {
+app.post('/voters-file', ensureLoggedIn(), isAdminAllowed, (req, res) => {
   voterFile(req, res, (err) => {
     if (err) {
       req.flash('errorMessage', 'invalid spreadsheet file!')
@@ -221,7 +223,7 @@ app.post('/voters-file', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (r
 
           addVoter(temp)
         }
-        fs.unlinkSync('backend/voterFile.xlsx')
+        unlinkSync('backend/voterFile.xlsx')
         req.flash('successMessage', `success import voters`)
         res.redirect('/voters')
       })
@@ -230,7 +232,7 @@ app.post('/voters-file', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (r
 })
 
 // edit voters
-app.put('/voters', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res) => {
+app.put('/voters', ensureLoggedIn(), isAdminAllowed, (req, res) => {
   voterPhoto(req, res, async (err) => {
     if (err) {
       req.flash('errorMessage', 'invalid photo file!')
@@ -252,7 +254,7 @@ app.put('/voters', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, re
 
 //////////////////////////////////////// /// candidates ///////////////////////////////////////////
 // get all candidates
-app.get('/candidates', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+app.get('/candidates', ensureLoggedIn(), async (req, res) => {
   const candidate = await getCandidates()
   const user = req.user.username
   const errorMessage = req.flash('errorMessage')
@@ -272,7 +274,7 @@ app.get('/candidates', connectEnsureLogin.ensureLoggedIn(), async (req, res) => 
 })
 
 // add candidates
-app.post('/candidates', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res) => {
+app.post('/candidates', ensureLoggedIn(), isAdminAllowed, (req, res) => {
   // multer upload file foto
   candidatePhoto(req, res, async (err) => {
     if (err) {
@@ -294,26 +296,21 @@ app.post('/candidates', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (re
 /////////////////////////////////////// end of candidates ////////////////////////////////////////
 
 // delete data
-app.delete(
-  '/:type',
-  connectEnsureLogin.ensureLoggedIn(),
-  isAdminAllowed,
-  async (req, res, next) => {
-    if (req.params.type === 'voters') {
-      await deleteVoter(req.body.nim)
-      req.flash('successMessage', `${req.body.nim} deleted`)
-      res.redirect('back')
-    } else if (req.params.type === 'candidates') {
-      const candidate = await getSingleCandidate(req.body.id)
-      await deleteCandidate(req.body.id)
+app.delete('/:type', ensureLoggedIn(), isAdminAllowed, async (req, res, next) => {
+  if (req.params.type === 'voters') {
+    await deleteVoter(req.body.nim)
+    req.flash('successMessage', `${req.body.nim} deleted`)
+    res.redirect('back')
+  } else if (req.params.type === 'candidates') {
+    const candidate = await getSingleCandidate(req.body.id)
+    await deleteCandidate(req.body.id)
 
-      req.flash('successMessage', `candidate ${candidate.candidate} deleted`)
-      res.redirect('back')
-    } else {
-      next()
-    }
+    req.flash('successMessage', `candidate ${candidate.candidate} deleted`)
+    res.redirect('back')
+  } else {
+    next()
   }
-)
+})
 
 /////////////////// export API ///////////////////
 // export data voter/candidate to validator
@@ -395,7 +392,7 @@ app.post('/public', isComplaintAllowed, async (req, res) => {
 })
 
 // complaint page
-app.get('/complaints', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+app.get('/complaints', ensureLoggedIn(), async (req, res) => {
   const complaints = await getComplaints(req.query)
   const user = req.user.username
   const successMessage = req.flash('successMessage')
@@ -410,7 +407,7 @@ app.get('/complaints', connectEnsureLogin.ensureLoggedIn(), async (req, res) => 
   })
 })
 
-app.post('/complaints', connectEnsureLogin.ensureLoggedIn(), async (req, res) => {
+app.post('/complaints', ensureLoggedIn(), async (req, res) => {
   try {
     await solveComplaint(req.body)
     req.flash('successMessage', `complaint ${req.body.email} solved`)
@@ -483,7 +480,7 @@ app.post('/reset-password-2', async (req, res) => {
 
 // admin change password
 app.post('/change-password', async (req, res) => {
-  const admin = await Admin.findByUsername(req.body.username)
+  const admin = await findByUsername(req.body.username)
 
   try {
     await admin.changePassword(req.body.currentPassword, req.body.newPassword)

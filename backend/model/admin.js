@@ -1,6 +1,7 @@
-const mongoose = require('mongoose')
-const passportLocalMongoose = require('passport-local-mongoose')
-require('dotenv').config({ path: './backend/config/.env' })
+import mongoose from 'mongoose'
+import dotenv from 'dotenv'
+import passportLocalMongoose from 'passport-local-mongoose'
+dotenv.config({ path: 'backend/config/.env' })
 
 // Connecting Mongoose
 mongoose.connect(process.env.MONGODB_URL, {
@@ -28,4 +29,4 @@ const adminSchema = new mongoose.Schema({
 
 adminSchema.plugin(passportLocalMongoose)
 
-module.exports = mongoose.model('Admin', adminSchema)
+export default mongoose.model('Admin', adminSchema)

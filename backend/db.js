@@ -1,16 +1,17 @@
-require('dotenv').config({ path: './backend/config/.env' })
-const mongoose = require('mongoose')
-const bcrypt = require('bcryptjs')
-const fs = require('fs')
-const Voter = require('./model/voter')
-const Candidate = require('./model/candidate')
-const Validator = require('./model/validator')
-const Admin = require('./model/admin')
-const Complaint = require('./model/complaint')
-const jwt = require('jsonwebtoken')
-const randomstring = require('randomstring')
-const { gmail, mailtrap } = require('./email')
-const ejs = require('ejs')
+import dotenv from 'dotenv'
+import mongoose from 'mongoose'
+import bcrypt from 'bcryptjs'
+import fs from 'fs'
+import Voter from './model/voter.js'
+import Candidate from './model/candidate.js'
+import Validator from './model/validator.js'
+import Admin from './model/admin.js'
+import Complaint from './model/complaint.js'
+import jwt from 'jsonwebtoken'
+import randomstring from 'randomstring'
+import {gmail, mailtrap} from './email.js'
+import ejs from 'ejs'
+dotenv.config({ path: 'backend/config/.env' })
 mongoose.connect(`${process.env.MONGODB_URL}`)
 
 //////////// voter ///////////////
@@ -587,7 +588,7 @@ const isComplaintAllowed = async (req, res, next) => {
   }
 }
 
-module.exports = {
+export {
   getVoters,
   getSingleVoter,
   addVoter,

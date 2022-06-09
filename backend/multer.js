@@ -1,9 +1,9 @@
-const multer = require('multer')
-const sha256 = require('crypto-js/sha256')
+import multer from 'multer'
+import sha256 from 'crypto-js/sha256.js'
 
 // define storage
 // set destination path & filename
-// filename : name are mixed nim & timestamp with SHA256 encryption
+// filename : name are mixed nim & timestamp with sha256 encryption
 const voterMulterStorage = multer.diskStorage({
   destination: 'public/photo/voters',
   filename: (req, file, cb) => {
@@ -41,7 +41,10 @@ const multerFilter = (req, file, cb) => {
 
 // filter for upload voter XLSX
 const xlsxFilter = (req, file, cb) => {
-  if (file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.mimetype === 'application/vnd.ms-excel') {
+  if (
+    file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+    file.mimetype === 'application/vnd.ms-excel'
+  ) {
     cb(null, true)
   } else {
     cb(new Error('Not a XLSX File!'), false)
@@ -58,7 +61,7 @@ const voterUpload = multer({
 // voter file upload
 const voterFileUpload = multer({
   storage: voterFileMulterStorage,
-  fileFilter: xlsxFilter
+  fileFilter: xlsxFilter,
 })
 
 // use both above strorage & filter configuration
@@ -68,5 +71,4 @@ const candidateUpload = multer({
   limits: { fileSize: 1000000 }, // max 1MB per photo
 })
 
-
-module.exports = { voterUpload, voterFileUpload, candidateUpload }
+export { voterUpload, voterFileUpload, candidateUpload }

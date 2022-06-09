@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate-v2')
+import mongoose from 'mongoose'
+import paginate from 'mongoose-paginate-v2'
 
 // schema voter
 const voterSchema = new mongoose.Schema({
@@ -41,9 +41,6 @@ const voterSchema = new mongoose.Schema({
   },
 })
 
-voterSchema.plugin(mongoosePaginate)
+voterSchema.plugin(paginate)
 
-// model voter dengan menggunakan schema diatas
-const Voter = mongoose.model('Voter', voterSchema)
-
-module.exports = Voter
+export default mongoose.model('Voter', voterSchema)

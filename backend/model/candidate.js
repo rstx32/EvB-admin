@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 // schema candidate
 const candidateSchema = mongoose.Schema({
@@ -10,6 +10,4 @@ const candidateSchema = mongoose.Schema({
     photo: String,
 })
 
-const Candidate = mongoose.model('Candidate', candidateSchema)
-
-module.exports = Candidate
+export default mongoose.model('Candidate', candidateSchema)

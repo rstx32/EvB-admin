@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 // schema validator
 const validatorSchema = new mongoose.Schema({
@@ -46,7 +46,4 @@ const validatorSchema = new mongoose.Schema({
   },
 })
 
-// model validator dengan menggunakan schema diatas
-const Validator = mongoose.model('Validator', validatorSchema)
-
-module.exports = Validator
+export default mongoose.model('Validator', validatorSchema)

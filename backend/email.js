@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer')
+import nodemailer from 'nodemailer'
 
 const gmail = nodemailer.createTransport({
   service: 'gmail',
@@ -17,4 +17,4 @@ const mailtrap = nodemailer.createTransport({
   },
 })
 
-module.exports = { gmail, mailtrap }
+export {gmail, mailtrap}

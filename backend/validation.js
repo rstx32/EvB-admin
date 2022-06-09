@@ -1,4 +1,4 @@
-const Joi = require('joi')
+import Joi from 'joi'
 
 // validation for voter
 const voterValidation = (voter) => {
@@ -67,4 +67,4 @@ const voterValidate = (key, type) => {
   return schema.validate(key)
 }
 
-module.exports = { voterValidation, candidateValidation, voterValidate }
+export { voterValidation, candidateValidation, voterValidate }

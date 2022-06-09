@@ -1,5 +1,5 @@
-const mongoose = require('mongoose')
-const mongoosePaginate = require('mongoose-paginate-v2')
+import mongoose from 'mongoose'
+import paginate from 'mongoose-paginate-v2'
 
 // schema candidate
 const complaintSchema = mongoose.Schema({
@@ -18,8 +18,6 @@ const complaintSchema = mongoose.Schema({
   },
 })
 
-complaintSchema.plugin(mongoosePaginate)
+complaintSchema.plugin(paginate)
 
-const Complaint = mongoose.model('Complaint', complaintSchema)
-
-module.exports = Complaint
+export default mongoose.model('Complaint', complaintSchema)
