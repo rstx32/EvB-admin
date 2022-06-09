@@ -388,14 +388,21 @@
                                                     <!-- form -->
                                                     <form method="post" action="/voters?_method=PUT" enctype="multipart/form-data">
                                                         <!-- hidden input value -->
-                                                        <input type="hidden" name="email" value="<%= v.email %>">
                                                         <input type="hidden" name="nim" value="<%= v.nim %>">
                                                         
                                                         <!-- fullname -->
                                                         <div class="form-floating mb-3">
                                                             <input type="text" name="fullname" class="form-control" id="floatingInput" placeholder="fullname" value="<%= v.fullname %>">
                                                             <label for="floatingInput">
-                                                                New Full Name
+                                                                New FullName
+                                                            </label>
+                                                        </div>
+                                                        
+                                                        <!-- fullname -->
+                                                        <div class="form-floating mb-3">
+                                                            <input type="email" name="email" class="form-control" id="floatingInput" placeholder="email" value="<%= v.email %>">
+                                                            <label for="floatingInput">
+                                                                New Email
                                                             </label>
                                                         </div>
                                                         

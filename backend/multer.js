@@ -3,11 +3,11 @@ const sha256 = require('crypto-js/sha256')
 
 // define storage
 // set destination path & filename
-// filename : name are mixed email & timestamp with SHA256 encryption
+// filename : name are mixed nim & timestamp with SHA256 encryption
 const voterMulterStorage = multer.diskStorage({
   destination: 'public/photo/voters',
   filename: (req, file, cb) => {
-    const name = sha256(req.body.email + Date.now())
+    const name = sha256(req.body.nim + Date.now())
     const extension = file.mimetype.split('/')[1]
     cb(null, 'voter-' + name + '.' + extension)
   },

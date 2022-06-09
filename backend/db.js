@@ -88,12 +88,12 @@ const addVoter = async (newVoter, newPhoto) => {
 }
 
 // delete voter
-const deleteVoter = async (paramEmail) => {
+const deleteVoter = async (nim) => {
   // delete photo
-  deletePhoto(paramEmail, 'voters')
+  deletePhoto(nim, 'voters')
 
   await Voter.deleteOne({
-    email: paramEmail,
+    nim: nim,
   })
 }
 
@@ -101,30 +101,32 @@ const deleteVoter = async (paramEmail) => {
 const editVoter = async (newVoter, newPhoto) => {
   const currentNIM = newVoter.nim
   const newFullname = newVoter.fullname
-  const email = newVoter.email
+  const newEmail = newVoter.email
 
   // if photo are none, do nothing
   // if photo are inserted, delete old photo and replace with the new one
   if (!newPhoto) {
-    await Voter.updateOne(
+    return await Voter.updateOne(
       {
         nim: currentNIM,
       },
       {
         $set: {
           fullname: newFullname,
+          email: newEmail,
         },
       }
     )
   } else {
-    deletePhoto(email, 'voters')
-    await Voter.updateOne(
+    deletePhoto(currentNIM, 'voters')
+    return await Voter.updateOne(
       {
         nim: currentNIM,
       },
       {
         $set: {
           fullname: newFullname,
+          email: newEmail,
           photo: newPhoto.filename,
         },
       }
@@ -135,7 +137,7 @@ const editVoter = async (newVoter, newPhoto) => {
 // delete photo
 const deletePhoto = async (key, type) => {
   let oldPhoto = {}
-  if (type === 'voters') oldPhoto = await getSingleVoter(key, 'getbyemail')
+  if (type === 'voters') oldPhoto = await getSingleVoter(key, 'findbynim')
   else if (type === 'candidates') oldPhoto = await getSingleCandidate(key)
 
   if (!oldPhoto) {

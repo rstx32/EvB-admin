@@ -231,18 +231,19 @@ app.post('/voters-file', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (r
 
 // edit voters
 app.put('/voters', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res) => {
-  voterPhoto(req, res, (err) => {
+  voterPhoto(req, res, async (err) => {
     if (err) {
       req.flash('errorMessage', 'invalid photo file!')
       res.redirect('/voters')
     } else {
       const { error, value } = voterValidation(req.body)
       if (error) {
+        console.log(error);
         req.flash('errorMessage', error.details)
         res.redirect('/voters')
       } else {
-        editVoter(value, req.file)
-        req.flash('successMessage', `success edit voter : ${value.email}`)
+        await editVoter(value, req.file)
+        req.flash('successMessage', `success edit voter : ${value.nim}`)
         res.redirect('/voters')
       }
     }
@@ -296,8 +297,8 @@ app.post('/candidates', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, asy
 // delete data
 app.delete('/:type', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res, next) => {
   if (req.params.type === 'voters') {
-    deleteVoter(req.body.email)
-    req.flash('successMessage', `${req.body.email} deleted`)
+    deleteVoter(req.body.nim)
+    req.flash('successMessage', `${req.body.nim} deleted`)
     res.redirect('back')
   } else if (req.params.type === 'candidates') {
     deleteCandidate(req.body.id)
