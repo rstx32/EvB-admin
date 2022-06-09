@@ -117,16 +117,26 @@ app.post('/register2', async (req, res) => {
 })
 
 // login page
-app.get('/login', (req, res) => {
-  const errorMessage = req.flash('errorMessage')
-  const successMessage = req.flash('successMessage')
+app.get(
+  '/login',
+  (req, res, next) => {
+    if (req.isAuthenticated()) {
+      res.redirect('/voters')
+    } else {
+      next()
+    }
+  },
+  (req, res, next) => {
+    const errorMessage = req.flash('errorMessage')
+    const successMessage = req.flash('successMessage')
 
-  res.render('auth/login', {
-    layout: 'layouts/auth-layout',
-    title: 'EvB-Admin Login',
-    flashMessage: { errorMessage, successMessage },
-  })
-})
+    res.render('auth/login', {
+      layout: 'layouts/auth-layout',
+      title: 'EvB-Admin Login',
+      flashMessage: { errorMessage, successMessage },
+    })
+  }
+)
 
 app.post(
   '/login',
