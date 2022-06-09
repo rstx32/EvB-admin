@@ -75,7 +75,7 @@ const addVoter = async (newVoter, newPhoto) => {
   const randomKey = randomstring.generate(6)
 
   try {
-    await Voter.create({
+    return await Voter.create({
       nim: newVoter.nim,
       fullname: newVoter.fullname,
       email: newVoter.email,
@@ -92,7 +92,7 @@ const deleteVoter = async (nim) => {
   // delete photo
   deletePhoto(nim, 'voters')
 
-  await Voter.deleteOne({
+  return await Voter.deleteOne({
     nim: nim,
   })
 }
@@ -614,5 +614,6 @@ module.exports = {
   getAdmin,
   resetKeyValidation,
   removeUnusedPhoto,
-  isComplaintAllowed
+  isComplaintAllowed,
+  getSingleCandidate
 }
