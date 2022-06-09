@@ -506,5 +506,5 @@ app.listen(process.env.HTTP_PORT, () => {
 // delete unused photo
 ;(async () => {
   removeUnusedPhoto()
-  createAccount(process.env.USERNAME, process.env.EMAIL)
+  createAccount(process.env.USERNAME_ADMIN, process.env.EMAIL)
 })()
