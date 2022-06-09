@@ -487,7 +487,7 @@ app.post('/reset-password-2', async (req, res) => {
 
 // admin change password
 app.post('/change-password', async (req, res) => {
-  const admin = await findByUsername(req.body.username)
+  const admin = await Admin.findByUsername(req.body.username)
 
   try {
     await admin.changePassword(req.body.currentPassword, req.body.newPassword)
