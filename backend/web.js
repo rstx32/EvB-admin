@@ -53,10 +53,10 @@ const app = express()
   .use(methodOverride('_method'))
   .use(
     session({
-      cookie: { maxAge: 1000 * 60 * 60 },
+      cookie: { maxAge: 1000 * 60 * 60},
       secret: process.env.SESSION_SECRET,
-      resave: true,
-      saveUninitialized: true,
+      resave: false,
+      saveUninitialized: false,
     })
   )
   .use(passport.initialize())
