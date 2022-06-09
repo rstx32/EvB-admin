@@ -120,11 +120,8 @@ app.post('/register2', async (req, res) => {
 app.get(
   '/login',
   (req, res, next) => {
-    if (req.isAuthenticated()) {
-      res.redirect('/voters')
-    } else {
-      next()
-    }
+    if (req.isAuthenticated()) res.redirect('/voters')
+    else next()
   },
   (req, res, next) => {
     const errorMessage = req.flash('errorMessage')
