@@ -135,8 +135,7 @@ app.post(
       message: 'wrong username or password!',
     },
     successRedirect: '/voters',
-  }),
-  (req, res) => {}
+  })
 )
 
 // logout
