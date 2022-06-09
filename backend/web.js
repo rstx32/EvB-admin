@@ -35,7 +35,8 @@ const {
   createAccount,
   resetKeyValidation,
   removeUnusedPhoto,
-  isComplaintAllowed
+  isComplaintAllowed,
+  getSingleCandidate
 } = require('./db')
 const { voterValidation, candidateValidation, voterValidate } = require('./validation')
 const voterPhoto = voterUpload.single('voterPhotoUpload')
@@ -273,9 +274,9 @@ app.get('/candidates', connectEnsureLogin.ensureLoggedIn(), async (req, res) => 
 })
 
 // add candidates
-app.post('/candidates', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, async (req, res) => {
+app.post('/candidates', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res) => {
   // multer upload file foto
-  candidatePhoto(req, res, (err) => {
+  candidatePhoto(req, res, async (err) => {
     if (err) {
       req.flash('message', 'invalid photo file!')
       res.redirect('/candidates')
@@ -285,8 +286,8 @@ app.post('/candidates', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, asy
         req.flash('errorMessage', error.details)
         res.redirect('/candidates')
       } else {
+        await addCandidate(value, req.file)
         req.flash('successMessage', `success add new candidate : ${value.candidate}`)
-        addCandidate(value, req.file)
         res.redirect('/candidates')
       }
     }
@@ -295,14 +296,16 @@ app.post('/candidates', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, asy
 /////////////////////////////////////// end of candidates ////////////////////////////////////////
 
 // delete data
-app.delete('/:type', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, res, next) => {
+app.delete('/:type', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, async (req, res, next) => {
   if (req.params.type === 'voters') {
-    deleteVoter(req.body.nim)
+    await deleteVoter(req.body.nim)
     req.flash('successMessage', `${req.body.nim} deleted`)
     res.redirect('back')
   } else if (req.params.type === 'candidates') {
-    deleteCandidate(req.body.id)
-    req.flash('successMessage', `candidate deleted`)
+    const candidate = await getSingleCandidate(req.body.id)
+    await deleteCandidate(req.body.id)
+    
+    req.flash('successMessage', `candidate ${candidate.candidate} deleted`)
     res.redirect('back')
   } else {
     next()
