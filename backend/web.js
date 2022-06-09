@@ -36,7 +36,7 @@ const {
   resetKeyValidation,
   removeUnusedPhoto,
   isComplaintAllowed,
-  getSingleCandidate
+  getSingleCandidate,
 } = require('./db')
 const { voterValidation, candidateValidation, voterValidate } = require('./validation')
 const voterPhoto = voterUpload.single('voterPhotoUpload')
@@ -191,13 +191,13 @@ app.post('/voters', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, r
         res.redirect('/voters')
       } else {
         const isVoterExist = await getSingleVoter(value.nim, 'findbynim')
-        
-		if (isVoterExist) {
+
+        if (isVoterExist) {
           req.flash('errorMessage', 'voter is exist!')
         } else {
-          addVoter(value, req.file)
-		  req.flash('successMessage', `success add new voter : ${value.email}`)	
-		}
+          await addVoter(value, req.file)
+          req.flash('successMessage', `success add new voter : ${value.email}`)
+        }
         res.redirect('/voters')
       }
     }
@@ -238,7 +238,6 @@ app.put('/voters', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (req, re
     } else {
       const { error, value } = voterValidation(req.body)
       if (error) {
-        console.log(error);
         req.flash('errorMessage', error.details)
         res.redirect('/voters')
       } else {
@@ -295,21 +294,26 @@ app.post('/candidates', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, (re
 /////////////////////////////////////// end of candidates ////////////////////////////////////////
 
 // delete data
-app.delete('/:type', connectEnsureLogin.ensureLoggedIn(), isAdminAllowed, async (req, res, next) => {
-  if (req.params.type === 'voters') {
-    await deleteVoter(req.body.nim)
-    req.flash('successMessage', `${req.body.nim} deleted`)
-    res.redirect('back')
-  } else if (req.params.type === 'candidates') {
-    const candidate = await getSingleCandidate(req.body.id)
-    await deleteCandidate(req.body.id)
-    
-    req.flash('successMessage', `candidate ${candidate.candidate} deleted`)
-    res.redirect('back')
-  } else {
-    next()
+app.delete(
+  '/:type',
+  connectEnsureLogin.ensureLoggedIn(),
+  isAdminAllowed,
+  async (req, res, next) => {
+    if (req.params.type === 'voters') {
+      await deleteVoter(req.body.nim)
+      req.flash('successMessage', `${req.body.nim} deleted`)
+      res.redirect('back')
+    } else if (req.params.type === 'candidates') {
+      const candidate = await getSingleCandidate(req.body.id)
+      await deleteCandidate(req.body.id)
+
+      req.flash('successMessage', `candidate ${candidate.candidate} deleted`)
+      res.redirect('back')
+    } else {
+      next()
+    }
   }
-})
+)
 
 /////////////////// export API ///////////////////
 // export data voter/candidate to validator
