@@ -1,4 +1,5 @@
 import dotenv from 'dotenv'
+dotenv.config({ path: 'backend/config/.env' })
 import * as fs from 'fs'
 import express from 'express'
 import expressLayouts from 'express-ejs-layouts'
@@ -41,7 +42,6 @@ import {
 import { voterValidation, candidateValidation, voterValidate } from './validation.js'
 import Admin from './model/admin.js'
 
-dotenv.config({ path: 'backend/config/.env' })
 const voterPhoto = voterUpload.single('voterPhotoUpload')
 const candidatePhoto = candidateUpload.single('candidatePhotoUpload')
 const voterFile = voterFileUpload.single('voterFile')
