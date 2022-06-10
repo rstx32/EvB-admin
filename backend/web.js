@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import { unlinkSync } from 'fs'
+import * as fs from 'fs'
 import express from 'express'
 import expressLayouts from 'express-ejs-layouts'
 import methodOverride from 'method-override'
@@ -7,7 +7,7 @@ import passport from 'passport'
 import session from 'express-session'
 import { ensureLoggedIn } from 'connect-ensure-login'
 import flash from 'connect-flash'
-import readXlsxFile from 'read-excel-file'
+import * as XLSX from 'xlsx/xlsx.mjs'
 import { voterUpload, voterFileUpload, candidateUpload } from './multer.js'
 import {
   getVoters,
@@ -53,7 +53,7 @@ const app = express()
   .use(methodOverride('_method'))
   .use(
     session({
-      cookie: { maxAge: 1000 * 60 * 60},
+      cookie: { maxAge: 1000 * 60 * 60 },
       secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
@@ -215,25 +215,34 @@ app.post('/voters', ensureLoggedIn(), isAdminAllowed, (req, res) => {
 
 // voters xlsx file upload
 app.post('/voters-file', ensureLoggedIn(), isAdminAllowed, (req, res) => {
-  voterFile(req, res, (err) => {
+  voterFile(req, res, async (err) => {
     if (err) {
       req.flash('errorMessage', 'invalid spreadsheet file!')
       res.redirect('/voters')
     } else {
-      readXlsxFile('backend/voterFile.xlsx').then((rows) => {
-        for (x = 1; x < rows.length; x++) {
-          const temp = {
-            nim: rows[x][0],
-            fullname: rows[x][1],
-            email: rows[x][2],
-          }
+      const buf = fs.readFileSync('backend/voterFile.xlsx')
+      const file = XLSX.read(buf)
+      const data = []
 
-          addVoter(temp)
-        }
-        unlinkSync('backend/voterFile.xlsx')
-        req.flash('successMessage', `success import voters`)
-        res.redirect('/voters')
+      const temp = XLSX.utils.sheet_to_json(file.Sheets.Sheet1)
+      temp.forEach((res) => {
+        data.push(res)
       })
+
+      console.log(data);
+      
+      for (let x = 0; x < data.length; x++) {
+        const voterTemp = {
+          nim: data[x].NIM,
+          fullname: data[x].Name,
+          email: data[x].Email,
+        }
+
+        await addVoter(voterTemp)
+      }
+      fs.unlinkSync('backend/voterFile.xlsx')
+      req.flash('successMessage', `success import voters`)
+      res.redirect('/voters')
     }
   })
 })
