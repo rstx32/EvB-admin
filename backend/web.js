@@ -252,16 +252,16 @@ app.put('/voters', ensureLoggedIn(), isAdminAllowed, (req, res) => {
   voterPhoto(req, res, async (err) => {
     if (err) {
       req.flash('errorMessage', 'invalid photo file!')
-      res.redirect('/voters')
+      res.redirect('back')
     } else {
       const { error, value } = voterValidation(req.body)
       if (error) {
         req.flash('errorMessage', error.details)
-        res.redirect('/voters')
+        res.redirect('back')
       } else {
         await editVoter(value, req.file)
         req.flash('successMessage', `success edit voter : ${value.nim}`)
-        res.redirect('/voters')
+        res.redirect('back')
       }
     }
   })
