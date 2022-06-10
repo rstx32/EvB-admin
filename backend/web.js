@@ -220,10 +220,10 @@ app.post('/voters-file', ensureLoggedIn(), isAdminAllowed, (req, res) => {
       req.flash('errorMessage', 'invalid spreadsheet file!')
       res.redirect('/voters')
     } else {
-      const buf = fs.readFileSync('backend/voterFile.xlsx')
-      const file = XLSX.read(buf)
+      const file = XLSX.read(
+        fs.readFileSync('backend/voterFile.xlsx')
+      )
       const data = []
-
       const temp = XLSX.utils.sheet_to_json(file.Sheets.Sheet1)
       temp.forEach((res) => {
         data.push(res)
