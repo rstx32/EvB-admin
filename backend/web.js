@@ -191,13 +191,13 @@ app.post('/voters', ensureLoggedIn(), isAdminAllowed, (req, res) => {
   voterPhoto(req, res, async (err) => {
     if (err) {
       req.flash('errorMessage', 'invalid photo file!')
-      res.redirect('/voters')
+      res.redirect('/back')
     } else {
       const { error, value } = voterValidation(req.body)
 
       if (error) {
         req.flash('errorMessage', error.details)
-        res.redirect('/voters')
+        res.redirect('/back')
       } else {
         const isVoterExist = await getSingleVoter(value.nim, 'findbynim')
 
@@ -207,7 +207,7 @@ app.post('/voters', ensureLoggedIn(), isAdminAllowed, (req, res) => {
           await addVoter(value, req.file)
           req.flash('successMessage', `success add new voter : ${value.email}`)
         }
-        res.redirect('/voters')
+        res.redirect('/back')
       }
     }
   })
