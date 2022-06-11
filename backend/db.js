@@ -9,7 +9,7 @@ import Admin from './model/admin.js'
 import Complaint from './model/complaint.js'
 import jwt from 'jsonwebtoken'
 import randomstring from 'randomstring'
-import {gmail, mailtrap} from './email.js'
+import {gmail, mailtrap, ethereal} from './email.js'
 import ejs from 'ejs'
 dotenv.config({ path: 'backend/config/.env' })
 mongoose.connect(`${process.env.MONGODB_URL}`)
@@ -391,7 +391,7 @@ const sendResetKey = async (email) => {
         }
       )
 
-      mailtrap.sendMail({
+      ethereal.sendMail({
         from: 'evb-organizer@evb.com',
         to: lowercaseEmail,
         subject: 'Admin Reset Password',
@@ -414,7 +414,7 @@ const sendResetKey = async (email) => {
         reset_password: randomkey,
       })
 
-      mailtrap.sendMail({
+      ethereal.sendMail({
         from: 'evb-organizer@evb.com',
         to: lowercaseEmail,
         subject: 'Voter Reset Password',
@@ -558,7 +558,7 @@ const createAccount = async (username, email) => {
       subject: 'EvB Admin Access',
       text: `admin password for access : ${password}`,
     }
-    mailtrap.sendMail(mailOptions)
+    ethereal.sendMail(mailOptions)
   } else {
     return
   }
