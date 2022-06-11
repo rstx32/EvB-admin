@@ -1,8 +1,8 @@
 <!-- Content Row -->
-<div class="container d-flex h-100">
-    <div class="row align-self-center w-100">
-        <div class="col-8 mx-auto">
-
+<div class="container">
+    <div class="row h-100"> 
+        
+        <div class="col-sm-12 my-auto">
             <% if (flashMessage.errorMessage.length>0) { %>
                 <% for( let index = 0; index < flashMessage.errorMessage.length; index++ ) { %>
                     <div class="alert alert-danger" role="alert">
@@ -199,8 +199,8 @@
                 </div>
             </div>
             <!-- Modal send complain -->
-
         </div>
+                
         <center>
             <%- include('auth/homepage-link.ejs') %> 
         </center>
