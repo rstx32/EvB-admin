@@ -255,14 +255,14 @@ const getValidator = async () => {
 // solve error
 const solveError = async (data, type) => {
   if (type === 'voter') {
-    await Validator.updateOne(
+    return await Validator.updateOne(
       { _id: data.validator },
       {
         'voter.solve': 'solved',
       }
     )
   } else if (type === 'candidate') {
-    await Validator.updateOne(
+    return await Validator.updateOne(
       { _id: data.validator },
       {
         'candidate.solve': 'solved',

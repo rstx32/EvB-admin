@@ -370,7 +370,7 @@ app.get('/voter', tokenValidation, async (req, res) => {
 
 // solve error
 app.post('/solve/:type', async (req, res) => {
-  solveError(req.body, req.params.type)
+  await solveError(req.body, req.params.type)
   res.redirect(`/${req.params.type}s`)
 })
 
