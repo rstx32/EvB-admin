@@ -39,6 +39,7 @@
     var key = document.getElementById("key");
 
     key.onkeypress = function(){
-        document.getElementById("errorMessage").style.display = "none";
+        if(document.getElementById("errorMessage"))
+            document.getElementById("errorMessage").style.display = "none";
     }
 </script>
