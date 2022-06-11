@@ -377,11 +377,12 @@ const sendResetKey = async (email) => {
 
   if (account !== null) {
     const randomkey = randomstring.generate(6)
+    const lowercaseEmail = email.toLowerCase()
 
     if (type === 'admin') {
       await Admin.updateOne(
         {
-          email: email,
+          email: lowercaseEmail,
         },
         {
           $set: {
@@ -392,14 +393,14 @@ const sendResetKey = async (email) => {
 
       mailtrap.sendMail({
         from: 'evb-organizer@evb.com',
-        to: email,
+        to: lowercaseEmail,
         subject: 'Admin Reset Password',
         text: `admin password reset key : ${randomkey}`,
       })
     } else if (type === 'voter') {
       await Voter.updateOne(
         {
-          email: email,
+          email: lowercaseEmail,
         },
         {
           $set: {
@@ -415,7 +416,7 @@ const sendResetKey = async (email) => {
 
       mailtrap.sendMail({
         from: 'evb-organizer@evb.com',
-        to: email,
+        to: lowercaseEmail,
         subject: 'Voter Reset Password',
         html: fileHTML,
       })
@@ -533,6 +534,7 @@ const getAdmin = async (key, type) => {
 const createAccount = async (username, email) => {
   const admin = await getAdmin(username, 'findbyusername')
   const password = randomstring.generate(8)
+  const lowercaseEmail = email.toLowerCase()
 
   if (admin === null) {
     Admin.register({ username: username }, password)
@@ -544,7 +546,7 @@ const createAccount = async (username, email) => {
         },
         {
           $set: {
-            email: email,
+            email: lowercaseEmail,
           },
         }
       )
@@ -552,7 +554,7 @@ const createAccount = async (username, email) => {
 
     const mailOptions = {
       from: 'evb-organizer@evb.com',
-      to: email,
+      to: lowercaseEmail,
       subject: 'EvB Admin Access',
       text: `admin password for access : ${password}`,
     }
