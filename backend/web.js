@@ -82,17 +82,13 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
   const { error, value } = voterValidate(req.body, 'validateByKey')
   if (error) {
-    req.flash('message', 'invalid key!')
+    req.flash('errorMessage', 'invalid key format!')
     res.redirect('register')
   } else {
     const voter = await getSingleVoter(req.body.key, 'findbykey')
-    const status = await isPubkeyExist(voter.nim)
 
-    if (status === 1) {
-      req.flash('message', 'invalid key!')
-      res.redirect('register')
-    } else if (status === 2) {
-      req.flash('message', `voter has been registered!`)
+    if (voter === null) {
+      req.flash('errorMessage', 'invalid key, or voter has been registered!')
       res.redirect('register')
     } else {
       res.render('auth/register-2', {
