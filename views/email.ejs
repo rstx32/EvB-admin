@@ -116,7 +116,7 @@ table, td { color: #000000; } @media (max-width: 480px) { #u_content_text_2 .v-c
       <td class="v-container-padding-padding" style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:'Rubik',sans-serif;" align="left">
         
   <h1 style="margin: 0px; color: #ffffff; line-height: 270%; text-align: center; word-wrap: break-word; font-weight: normal; font-family: 'Rubik',sans-serif; font-size: 22px;">
-    EvB Reset Password
+    <%= header %> 
   </h1>
 
       </td>
@@ -151,14 +151,13 @@ table, td { color: #000000; } @media (max-width: 480px) { #u_content_text_2 .v-c
       <td class="v-container-padding-padding" style="overflow-wrap:break-word;word-break:break-word;padding:40px 50px 50px;font-family:'Rubik',sans-serif;" align="left">
         
   <div style="color: #5c5c5c; line-height: 170%; text-align: left; word-wrap: break-word;">
-    <p style="font-size: 14px; line-height: 170%;"><span style="font-size: 16px; line-height: 27.2px;"><strong>Hi <%= voter %>, </strong></span></p>
+    <p style="font-size: 14px; line-height: 170%;"><span style="font-size: 16px; line-height: 27.2px;"><strong><%= recipient %></strong></span></p>
 <p style="font-size: 14px; line-height: 170%;">&nbsp;</p>
-<p style="font-size: 14px; line-height: 170%;"><span style="font-size: 16px; line-height: 27.2px;">You are requested for reset password at E-voting Blockchain system, please register back to get your public &amp; pair key at EvB-admin.</span></p>
+<p style="font-size: 14px; line-height: 170%;"><span style="font-size: 16px; line-height: 27.2px;"><%= body1 %> </span></p>
 <p style="font-size: 14px; line-height: 170%;">&nbsp;</p>
-<p style="font-size: 14px; line-height: 170%;"><span style="font-size: 16px; line-height: 27.2px;">here's your secret code key to register, <span style="color: #e03e2d; font-size: 16px; line-height: 27.2px;">do not share with anyone</span>!</span></p>
-<p style="font-size: 14px; line-height: 170%; text-align: center;"><strong><span style="font-size: 16px; line-height: 27.2px;"><%= reset_password %></span></strong></p>
+<p style="font-size: 14px; line-height: 170%;"><span style="font-size: 16px; line-height: 27.2px;"><%= body2 %> </span></p>
+<p style="font-size: 14px; line-height: 170%; text-align: center;"><strong><span style="font-size: 16px; line-height: 27.2px;"><%= key %></span></strong></p>
 <p style="font-size: 14px; line-height: 170%;">&nbsp;</p>
-<p style="font-size: 14px; line-height: 170%;"><span style="font-size: 16px; line-height: 27.2px;">If you have any questions/issues regarding the process, feel free to contact us.&nbsp;</span></p>
 <p style="font-size: 14px; line-height: 170%;">&nbsp;</p>
 <p style="font-size: 14px; line-height: 170%; text-align: right;"><span style="font-size: 16px; line-height: 27.2px;">With Regards,</span></p>
 <p style="font-size: 14px; line-height: 170%; text-align: right;"><span style="font-size: 16px; line-height: 27.2px;"><strong>EvB-organizer</strong></span></p>

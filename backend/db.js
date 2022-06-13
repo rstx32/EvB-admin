@@ -391,12 +391,22 @@ const sendResetKey = async (email) => {
         }
       )
 
-      ethereal.sendMail({
+      const fileHTML = await ejs.renderFile('views/email.ejs', {
+        header: `EvB Reset Password`,
+        recipient: `Hi ${account.username},`,
+        body1: `You are requested for reset password at EvB-Admin, please change your password immediately.`,
+        body2: `here's your secret code key to reset password, do not share with anyone!`,
+        key: randomkey,
+      })
+
+      let info = await ethereal.sendMail({
         from: 'evb-organizer@evb.com',
         to: lowercaseEmail,
-        subject: 'Admin Reset Password',
-        text: `admin password reset key : ${randomkey}`,
+        subject: 'EvB | Admin Reset Password',
+        html: fileHTML,
       })
+
+      console.log(`admin reset password sent : ${info.messageId}`)
     } else if (type === 'voter') {
       await Voter.updateOne(
         {
@@ -410,16 +420,21 @@ const sendResetKey = async (email) => {
       )
 
       const fileHTML = await ejs.renderFile('views/email.ejs', {
-        voter: account.fullname,
-        reset_password: randomkey,
+        header: `EvB Reset Password`,
+        recipient: `Hi ${account.fullname},`,
+        body1: `You are requested for reset password at EvB-Admin, please change your password immediately`,
+        body2: `here's your secret code key to reset password, do not share with anyone!`,
+        key: randomkey,
       })
 
-      ethereal.sendMail({
+      let info = await ethereal.sendMail({
         from: 'evb-organizer@evb.com',
         to: lowercaseEmail,
-        subject: 'Voter Reset Password',
+        subject: 'EvB | Voter Reset Password',
         html: fileHTML,
       })
+
+      console.log(`voter reset password sent : ${info.messageId}`)
     }
 
     return true
@@ -552,13 +567,21 @@ const createAccount = async (username, email) => {
       )
     }, 500)
 
-    const mailOptions = {
+    const fileHTML = await ejs.renderFile('views/email.ejs', {
+      header: `EvB Admin Login Password`,
+      recipient: `Hi, ${username}`,
+      body1: `You are permitted as admin organizer at EvB-Admin, use password below to login at EvB-Admin web.`,
+      body2: `here's your new password, do not share with anyone!`,
+      key: password,
+    })
+
+    let info = await ethereal.sendMail({
       from: 'evb-organizer@evb.com',
       to: lowercaseEmail,
-      subject: 'EvB Admin Access',
-      text: `admin password for access : ${password}`,
-    }
-    ethereal.sendMail(mailOptions)
+      subject: 'EvB | Admin Login Password',
+      html: fileHTML,
+    })
+    console.log(`admin password sent : ${info.messageId}`)
   } else {
     return
   }
