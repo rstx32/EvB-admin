@@ -321,6 +321,7 @@ app.delete('/:type', ensureLoggedIn(), isAdminAllowed, async (req, res, next) =>
 })
 
 /////////////////// export API ///////////////////
+
 // export data voter/candidate to validator
 app.get('/export/:type', tokenValidation, async (req, res) => {
   if (req.params.type === 'voter') {
@@ -334,29 +335,12 @@ app.get('/export/:type', tokenValidation, async (req, res) => {
   }
 })
 
-// export voter pubkey
-app.get('/voter/pubkey', tokenValidation, async (req, res) => {
-  console.log(req.query)
-  const { error } = voterValidate(req.query, 'validateByNim')
-
-  if (error) {
-    res.send(error)
-  } else {
-    const pubKey = await getVoterPubkey(req.query.nim)
-    res.send(pubKey)
-  }
-})
-
-// export voter password
-app.get('/voter/passwd', tokenValidation, async (req, res) => {
-  const voter = await getvoterpasswd(req.query.nim)
-  res.send(voter)
-})
-
-// export a voter
+// export a voter to node
 app.get('/voter', tokenValidation, async (req, res) => {
   const voter = await getSingleVoter(req.query.nim, 'findbynim')
-  res.send(voter)
+  
+  if (voter !== null) res.json(voter)
+  else res.json({ status: 'user not found!' })
 })
 /////////////////// end export API ///////////////////
 
