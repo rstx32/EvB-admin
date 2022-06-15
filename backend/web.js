@@ -161,9 +161,9 @@ app.get('/', (req, res) => {
 /////////////////////////////////////////// voters ///////////////////////////////////////////
 // get all voters
 app.get('/voters', ensureLoggedIn(), async (req, res) => {
-  const voters = await getVoters(req.query)
   const errorMessage = req.flash('errorMessage')
   const successMessage = req.flash('successMessage')
+  const voters = await getVoters(req.query)
   const user = req.user.username
   const validator = await getValidator()
   const admin = await Admin.findOne({ username: 'admin' })
@@ -187,13 +187,13 @@ app.post('/voters', ensureLoggedIn(), isAdminAllowed, (req, res) => {
   voterPhoto(req, res, async (err) => {
     if (err) {
       req.flash('errorMessage', 'invalid photo file!')
-      res.redirect('/back')
+      res.redirect('/voters')
     } else {
       const { error, value } = voterValidation(req.body)
 
       if (error) {
         req.flash('errorMessage', error.details)
-        res.redirect('/back')
+        res.redirect('/voters')
       } else {
         const isVoterExist = await getSingleVoter(value.nim, 'findbynim')
 
@@ -203,7 +203,7 @@ app.post('/voters', ensureLoggedIn(), isAdminAllowed, (req, res) => {
           await addVoter(value, req.file)
           req.flash('successMessage', `success add new voter : ${value.email}`)
         }
-        res.redirect('/back')
+        res.redirect('/voters')
       }
     }
   })
@@ -216,17 +216,13 @@ app.post('/voters-file', ensureLoggedIn(), isAdminAllowed, (req, res) => {
       req.flash('errorMessage', 'invalid spreadsheet file!')
       res.redirect('/voters')
     } else {
-      const file = XLSX.read(
-        fs.readFileSync('backend/voterFile.xlsx')
-      )
+      const file = XLSX.read(fs.readFileSync('backend/voterFile.xlsx'))
       const data = []
       const temp = XLSX.utils.sheet_to_json(file.Sheets.Sheet1)
       temp.forEach((res) => {
         data.push(res)
       })
 
-      console.log(data);
-      
       for (let x = 0; x < data.length; x++) {
         const voterTemp = {
           nim: data[x].NIM,
@@ -492,15 +488,23 @@ app.post('/reset-password-2', async (req, res) => {
 
 // admin change password
 app.post('/change-password', async (req, res) => {
-  const admin = await Admin.findByUsername(req.body.username)
-
-  try {
-    await admin.changePassword(req.body.currentPassword, req.body.newPassword)
-    req.flash('successMessage', 'password successfully changed')
-    res.redirect('/logout')
-  } catch (error) {
-    req.flash('errorMessage', 'incorrect current password!')
+  if (req.body.newPassword === '') {
+    req.flash('errorMessage', 'new password must be filled!')
     res.redirect('back')
+  } else if (req.body.newPassword.length < 5) {
+    req.flash('errorMessage', 'new password must be at least 5 characters!')
+    res.redirect('back')
+  } else {
+    const admin = await Admin.findByUsername(req.body.username)
+
+    try {
+      await admin.changePassword(req.body.currentPassword, req.body.newPassword)
+      req.flash('successMessage', 'password successfully changed')
+      res.redirect('/logout')
+    } catch (error) {
+      req.flash('errorMessage', 'incorrect current password!')
+      res.redirect('back')
+    }
   }
 })
 
