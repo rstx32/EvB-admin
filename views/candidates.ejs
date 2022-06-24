@@ -2,7 +2,7 @@
 <% if (flashMessage.errorMessage.length > 0) { %>
     <div class="card mb-4 py-3 border-left-danger">
         <div class="card-body">
-            <ul>
+            <ul>-
                 <% flashMessage.errorMessage.forEach(e => { %>
                     <li>
                         <%= e.message %>
@@ -42,20 +42,20 @@
     </div>
     <!-- end card candidate count -->
 
-    <!-- card add candidate -->
-    <div class="col-lg-2 col-md-9 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <!-- modal button add candidate -->
-                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addCandidate">
-                    <i class="bi bi-person-plus">Add Candidate</i>
-                </button>
+    <% if (adminStatus==='allow') { %>
+        <!-- card add candidate -->
+        <div class="col-lg-2 col-md-9 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <!-- modal button add candidate -->
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addCandidate">
+                        <i class="bi bi-person-plus">Add Candidate</i>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- card add candidate -->
-
-    <% if (adminStatus==='deny') { %>
+        <!-- card add candidate -->
+    <% } else { %>
         <!-- card admin locked -->
         <div class="col-lg-2 col-md-9 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
@@ -185,12 +185,14 @@
                 </h5>
                 <h6 class="card-subtitle mb-2 text-muted"><%= c.viceCandidate %></h6>
                 
-                <form method="post" action="/candidates?_method=DELETE">
-                    <input type="hidden" name="id" value="<%= c._id %>">
-                    <button class="btn btn-danger btn-circle" type="submit" data-bs-dismiss="modal" onclick="return confirm('are you sure?')"> 
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </form>
+                <% if (adminStatus==='allow') { %>
+                    <form method="post" action="/candidates?_method=DELETE">
+                        <input type="hidden" name="id" value="<%= c._id %>">
+                        <button class="btn btn-danger btn-circle" type="submit" data-bs-dismiss="modal" onclick="return confirm('are you sure?')"> 
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                <% } %>
             </div>
         </div>
     

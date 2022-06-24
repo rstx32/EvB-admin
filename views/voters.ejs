@@ -59,33 +59,33 @@
     </div>
     <!-- end card total page -->
 
-    <!-- card add voter -->
-    <div class="col-lg-2 col-md-9 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <!-- modal button add voter -->
-                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addVoter">
-                    <i class="bi bi-person-plus"> Add Voter</i>
-                </button>
+    <% if (adminStatus==='allow') { %>
+        <!-- card add voter -->
+        <div class="col-lg-2 col-md-9 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <!-- modal button add voter -->
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addVoter">
+                        <i class="bi bi-person-plus"> Add Voter</i>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- end card add voter -->
+        <!-- end card add voter -->
 
-    <!-- card add voter XLSX -->
-    <div class="col-lg-2 col-md-9 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <!-- modal button add voter XLSX -->
-                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importVoter">
-                    <i class="bi bi-cloud-upload"> Import Voter XLSX</i>
-                </button>
+        <!-- card add voter XLSX -->
+        <div class="col-lg-2 col-md-9 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <!-- modal button add voter XLSX -->
+                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importVoter">
+                        <i class="bi bi-cloud-upload"> Import Voter XLSX</i>
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- end card add voter XLSX -->
-    
-    <% if (adminStatus==='deny') { %>
+        <!-- end card add voter XLSX -->
+    <% } else { %>
         <!-- card admin locked -->
         <div class="col-lg-2 col-md-9 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
@@ -336,18 +336,20 @@
                                                 <!-- modal footer -->
                                                 <div class="modal-footer">
 
-                                                    <!-- modal button delete voter -->
-                                                    <form method="post" action="/voters?_method=DELETE">
-                                                        <input type="hidden" name="nim" value="<%= v.nim %>">
-                                                        <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" onclick="return confirm('are you sure?')">Delete</button>
-                                                    </form>
-                                                    <!-- end modal button delete voter -->
-
-                                                    <!-- modal button edit voter -->
-                                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editVoter<%= v._id %>">
-                                                        Edit
-                                                    </button>
-                                                    <!-- end modal button edit voter -->
+                                                    <% if (adminStatus==='allow') { %>
+                                                        <!-- modal button delete voter -->
+                                                        <form method="post" action="/voters?_method=DELETE">
+                                                            <input type="hidden" name="nim" value="<%= v.nim %>">
+                                                            <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" onclick="return confirm('are you sure?')">Delete</button>
+                                                        </form>
+                                                        <!-- end modal button delete voter -->
+    
+                                                        <!-- modal button edit voter -->
+                                                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editVoter<%= v._id %>">
+                                                            Edit
+                                                        </button>
+                                                        <!-- end modal button edit voter -->
+                                                    <% } %>
 
                                                 </div>
                                                 <!-- end modal footer -->
