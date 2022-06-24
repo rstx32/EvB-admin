@@ -294,17 +294,17 @@ const isAdminAllowed = async (req, res, next) => {
     req.url === '/voters?_method=PUT'
   ) {
     if (admin.voterAccess === 'allow') {
-      return next()
+      next()
     } else if (admin.voterAccess === 'deny') {
-      req.flash('errorMessage', 'voter has been locked!')
-      return res.redirect('/voters')
+      // req.flash('errorMessage', 'voter has been locked!')
+      res.redirect('/voters')
     }
   } else if (req.url === '/candidates' || req.params.type === 'candidates') {
     if (admin.candidateAccess === 'allow') {
-      return next()
+      next()
     } else if (admin.candidateAccess === 'deny') {
-      req.flash('errorMessage', 'candidate has been locked!')
-      return res.redirect('/candidates')
+      // req.flash('errorMessage', 'candidate has been locked!')
+      res.redirect('/candidates')
     }
   }
 }
